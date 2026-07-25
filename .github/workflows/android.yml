@@ -70,6 +70,30 @@ jobs:
             exit 1
           }
 
+      # A missing or misnamed secret still produces a perfectly good APK - just one signed with a
+      # throwaway debug key, which silently cannot update the previous install. Printing the
+      # certificate makes that visible in the log instead of only on the phone.
+      - name: Verify signing
+        run: |
+          APK=$(find app/build/outputs/apk/release -name '*.apk' | head -1)
+          if [ -z "$APK" ]; then
+            echo "::error::No release APK was produced."
+            exit 1
+          fi
+          echo "APK: $APK"
+          echo "::group::Signing certificate"
+          keytool -printcert -jarfile "$APK" | grep -E 'Owner:|Valid from:|SHA256:' || {
+            echo "::error::The APK carries no readable signing certificate."
+            exit 1
+          }
+          echo "::endgroup::"
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "::warning::Signed with the debug key because KEYSTORE_BASE64 is not set. \
+          This APK cannot install over an existing installation, so in-app updates will not work."
+          else
+            echo "Signed with the configured release keystore."
+          fi
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
