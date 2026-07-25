@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The medicine list and history are worth restoring to a new phone; the armed-alarm
+     bookkeeping is not, it is rebuilt on first launch. -->
+<full-backup-content>
+    <include domain="database" path="medicijnen.db" />
+    <include domain="sharedpref" path="." />
+    <exclude domain="sharedpref" path="armed_alarms.xml" />
+</full-backup-content>

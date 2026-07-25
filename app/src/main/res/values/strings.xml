@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Mijn Medicijnen</string>
+
+    <!-- Tabbladen -->
+    <string name="tab_today">Vandaag</string>
+    <string name="tab_medicines">Medicijnen</string>
+    <string name="tab_history">Geschiedenis</string>
+    <string name="tab_settings">Instellingen</string>
+    <string name="title_edit_medicine">Medicijn</string>
+
+    <!-- Algemene acties -->
+    <string name="action_taken">Ingenomen</string>
+    <string name="action_snooze">Snooze</string>
+    <string name="action_skip">Overslaan</string>
+    <string name="action_undo">Ongedaan maken</string>
+    <string name="action_save">Opslaan</string>
+    <string name="action_delete">Verwijderen</string>
+    <string name="action_cancel">Annuleren</string>
+    <string name="action_clear">Wissen</string>
+    <string name="action_back">Terug</string>
+    <string name="action_fix">Instellen</string>
+    <string name="action_add_medicine">Medicijn toevoegen</string>
+    <string name="action_add_time">Tijdstip toevoegen</string>
+    <string name="action_previous_month">Vorige maand</string>
+    <string name="action_next_month">Volgende maand</string>
+
+    <!-- Vandaag -->
+    <string name="today_open">Nog in te nemen</string>
+    <string name="today_done">Afgehandeld</string>
+    <string name="today_nothing_scheduled">Vandaag staat er niets gepland.</string>
+    <string name="today_empty_title">Nog geen medicijnen</string>
+    <string name="today_empty_body">Voeg je medicijnen toe met hun tijden, en je krijgt elke dag een herinnering. Vul ook je voorraad en de levertijd van de apotheek in, dan waarschuwt de app op tijd om bij te bestellen.</string>
+    <string name="dose_amount">%1$s stuks</string>
+    <string name="dose_snoozed_until">Uitgesteld tot %1$s</string>
+    <string name="status_taken">Ingenomen</string>
+    <string name="status_skipped">Overgeslagen</string>
+    <string name="status_missed">Gemist</string>
+
+    <!-- Bijbestellen -->
+    <string name="refill_card_title">Bestel %1$s bij</string>
+    <string name="refill_received_package">Nieuwe verpakking ontvangen</string>
+    <string name="medicine_stock_line">Voorraad: %1$s</string>
+    <string name="medicine_order_now">Nu bestellen</string>
+    <string name="medicine_inactive">Niet actief</string>
+
+    <!-- Medicijnen -->
+    <string name="medicines_empty">Je hebt nog geen medicijnen toegevoegd. Gebruik de knop rechtsonder.</string>
+    <string name="delete_title">%1$s verwijderen?</string>
+    <string name="delete_body">De geschiedenis van dit medicijn wordt ook verwijderd.</string>
+
+    <!-- Formulier -->
+    <string name="field_name">Naam</string>
+    <string name="field_dosage">Sterkte</string>
+    <string name="field_dosage_hint">bijv. 50 mg</string>
+    <string name="field_amount">Aantal</string>
+    <string name="field_notes">Notities</string>
+    <string name="field_active">Actief</string>
+    <string name="field_start_date">Startdatum: %1$s</string>
+    <string name="field_end_date">Einddatum: %1$s</string>
+    <string name="field_end_date_none">Geen einddatum</string>
+    <string name="section_schedule">Schema</string>
+    <string name="section_times">Tijdstippen</string>
+    <string name="section_stock">Voorraad en bestellen</string>
+    <string name="section_reminders">Herinneringen</string>
+    <string name="error_no_times">Voeg minstens één tijdstip toe.</string>
+
+    <string name="schedule_type_daily">Elke dag</string>
+    <string name="schedule_type_interval">Om de zoveel dagen</string>
+    <string name="schedule_type_weekdays">Vaste dagen</string>
+    <string name="schedule_type_cycle">Kuur (slikken/pauze)</string>
+    <string name="field_interval_days">Aantal dagen ertussen</string>
+    <string name="field_cycle_active">Dagen slikken</string>
+    <string name="field_cycle_pause">Dagen pauze</string>
+    <string name="field_cycle_anchor">Eerste dag van de strip: %1$s</string>
+    <string name="cycle_explainer">Voor bijvoorbeeld de anticonceptiepil: 21 dagen slikken, 7 dagen pauze. Zet de eerste dag van je huidige strip, dan loopt de app vanzelf mee.</string>
+    <string name="field_remind_on_pause">Ook herinneren tijdens de pauze</string>
+    <string name="field_remind_on_pause_hint">Aanzetten bij strips met placebopillen (28 stuks).</string>
+
+    <string name="field_track_stock">Voorraad bijhouden</string>
+    <string name="field_track_stock_hint">Nodig om op tijd te waarschuwen dat je moet bestellen.</string>
+    <string name="field_stock_count">Voorraad nu</string>
+    <string name="field_units_per_package">Per verpakking</string>
+    <string name="field_lead_time">Levertijd (dagen)</string>
+    <string name="field_buffer_days">Extra marge (dagen)</string>
+    <string name="field_lead_time_hint">De app waarschuwt zoveel dagen vóórdat je voorraad op is, zodat een bestelling op tijd binnen is.</string>
+
+    <string name="field_reminders_enabled">Herinneringen aan</string>
+    <string name="field_snooze_minutes">Snooze (minuten)</string>
+    <string name="field_repeat_if_ignored">Nogmaals herinneren</string>
+    <string name="field_repeat_if_ignored_hint">Eén extra melding na een half uur als je niets doet.</string>
+    <string name="field_sound_hint">Een eigen meldingsgeluid stel je per medicijn in via de Android-instellingen voor meldingen; elk medicijn heeft daar een eigen kanaal.</string>
+
+    <!-- Schema-omschrijvingen -->
+    <string name="schedule_daily">Elke dag</string>
+    <string name="schedule_cycle">%1$d dagen slikken, %2$d dagen pauze</string>
+    <string name="schedule_no_days">Geen dagen gekozen</string>
+    <string name="cycle_day_of">Dag %1$d van %2$d</string>
+
+    <!-- Geschiedenis -->
+    <string name="history_adherence_title">Therapietrouw deze maand</string>
+    <string name="history_empty">Nog geen gegevens voor deze maand.</string>
+    <string name="history_no_data">Geen gegevens</string>
+    <string name="history_taken_of">%1$d van %2$d ingenomen</string>
+
+    <!-- Instellingen -->
+    <string name="settings_delivery_title">Komen de herinneringen aan?</string>
+    <string name="settings_notifications">Meldingen toegestaan</string>
+    <string name="settings_exact_alarms">Exacte alarmen toegestaan</string>
+    <string name="settings_battery">Vrijgesteld van batterijoptimalisatie</string>
+    <string name="settings_delivery_hint">Staat er iets op rood, dan kan Android meldingen uitstellen of helemaal tegenhouden. Vooral de batterijvrijstelling is belangrijk op Samsung- en Xiaomi-toestellen.</string>
+    <string name="settings_snooze_hint">Wordt gebruikt voor nieuwe medicijnen; per medicijn kun je het apart instellen.</string>
+    <string name="settings_refill_throttle_hint">Zo vaak mag dezelfde bestelherinnering hooguit terugkomen.</string>
+    <string name="settings_version">Versie %1$s</string>
+
+    <!-- Meldingen -->
+    <string name="channel_medicine_description">Herinnering om dit medicijn in te nemen.</string>
+    <string name="channel_refill_name">Bestellen</string>
+    <string name="channel_refill_description">Waarschuwing dat je een nieuwe verpakking moet bestellen.</string>
+    <string name="notif_dose_title">%1$s innemen</string>
+    <string name="notif_dose_planned_at">gepland om %1$s</string>
+    <string name="notif_refill_title">Bestel %1$s bij</string>
+
+    <!-- Toestemmingen -->
+    <string name="permission_card_title">Herinneringen kunnen misgaan</string>
+    <string name="permission_card_body">Android houdt op dit moment iets tegen. Regel dit even, anders mis je een melding.</string>
+    <string name="permission_fix_notifications">Meldingen toestaan</string>
+    <string name="permission_fix_exact_alarms">Exacte alarmen toestaan</string>
+    <string name="permission_fix_battery">Batterijoptimalisatie uitzetten</string>
+
+    <!-- Widget -->
+    <string name="widget_title">Vandaag</string>
+    <string name="widget_take">Ingenomen</string>
+    <string name="widget_all_done">Alles ingenomen vandaag</string>
+    <string name="widget_nothing_today">Niets gepland vandaag</string>
+    <string name="widget_order_soon">Bestellen: %1$s</string>
+    <string name="widget_description">Wat je vandaag nog moet innemen.</string>
+
+    <plurals name="schedule_interval">
+        <item quantity="one">Elke dag</item>
+        <item quantity="other">Om de %1$d dagen</item>
+    </plurals>
+    <plurals name="cycle_active_left">
+        <item quantity="one">nog 1 dag slikken</item>
+        <item quantity="other">nog %1$d dagen slikken</item>
+    </plurals>
+    <plurals name="cycle_pause_left">
+        <item quantity="one">nog 1 dag pauze</item>
+        <item quantity="other">nog %1$d dagen pauze</item>
+    </plurals>
+    <plurals name="notif_refill_text">
+        <item quantity="one">Nog 1 dag voorraad, levertijd %2$d dagen.</item>
+        <item quantity="other">Nog %1$d dagen voorraad, levertijd %2$d dagen.</item>
+    </plurals>
+    <plurals name="refill_card_body">
+        <item quantity="one">Nog 1 dag voorraad en de apotheek doet er %2$d dagen over.</item>
+        <item quantity="other">Nog %1$d dagen voorraad en de apotheek doet er %2$d dagen over.</item>
+    </plurals>
+    <plurals name="medicine_order_by">
+        <item quantity="one">Bestellen vóór %1$s · nog 1 dag voorraad</item>
+        <item quantity="other">Bestellen vóór %1$s · nog %2$d dagen voorraad</item>
+    </plurals>
+    <plurals name="settings_snooze">
+        <item quantity="one">Snooze: 1 minuut</item>
+        <item quantity="other">Snooze: %1$d minuten</item>
+    </plurals>
+    <plurals name="settings_refill_throttle">
+        <item quantity="one">Bestelherinnering hooguit elke dag</item>
+        <item quantity="other">Bestelherinnering hooguit elke %1$d dagen</item>
+    </plurals>
+</resources>
