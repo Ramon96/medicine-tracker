@@ -25,6 +25,13 @@ Alles staat lokaal op de telefoon. Geen account, geen server, geen internet nodi
 - **Widget op het startscherm** met wat je vandaag nog moet innemen; aantikken is genoeg om het
   af te vinken.
 - **Geschiedenis** met een maandkalender en therapietrouw per medicijn.
+- **Eigen meldingsgeluid per medicijn**, met een knop om het vooraf te beluisteren, plus een
+  trilschakelaar. Je hoort dan aan het geluid al welk medicijn het is.
+- **Weergave naar eigen smaak**: licht, donker of systeem, acht kleuren, de kleuren van je
+  telefoonachtergrond, extra contrast, een schuifregelaar voor de tekstgrootte (85% tot 160%)
+  en een keuze uit drie lettertypes. De widget volgt dezelfde kleur.
+- **Updates vanuit de app**: onder Instellingen zie je je versie, kun je zelf controleren op een
+  nieuwe versie, en krijg je wekelijks een seintje als er een update klaarstaat.
 
 De voorraadberekening houdt rekening met het schema: een 21/7-pil verbruikt 21 pillen per 28
 dagen, niet 28. Een simpele "waarschuw onder de 10 pillen" zou daardoor te vroeg of te laat zijn.
@@ -50,11 +57,11 @@ drie dingen even, anders komen meldingen niet of te laat aan:
 - **de app vrijstellen van batterijoptimalisatie** - op Samsung en Xiaomi is dit de meest
   voorkomende reden dat herinneringen na een paar dagen stoppen
 
-### Ondertekening instellen (eenmalig, optioneel)
+### Ondertekening instellen (eenmalig, nodig voor updates)
 
-Zonder keystore wordt de APK met de debug-sleutel ondertekend. Dat werkt prima, maar een update
-kan dan niet over een eerdere installatie heen als die met een andere sleutel is getekend. Voor
-een vaste sleutel:
+Zonder keystore ondertekent de build met een wegwerp-debugsleutel, die per CI-machine verschilt.
+Android weigert dan een update over een eerdere installatie, en **updaten vanuit de app werkt
+niet**. Regel dit dus één keer:
 
 ```bash
 keytool -genkeypair -v -keystore keystore.jks -keyalg RSA -keysize 2048 \
@@ -64,7 +71,21 @@ base64 -w0 keystore.jks
 
 Zet daarna in *Settings → Secrets and variables → Actions* deze secrets:
 `KEYSTORE_BASE64` (de base64-uitvoer), `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD`.
-Bewaar `keystore.jks` goed en commit hem niet - hij staat in `.gitignore`.
+Bewaar `keystore.jks` goed en commit hem niet - hij staat in `.gitignore`. Raak je hem kwijt,
+dan kun je nooit meer over de bestaande installatie heen updaten.
+
+De eerste keer dat je overstapt op deze sleutel moet de app op de telefoon **verwijderd en
+opnieuw geïnstalleerd** worden, omdat de handtekening verandert. Daarbij gaan de ingevoerde
+medicijnen en geschiedenis verloren, dus doe dit zolang er nog weinig in staat.
+
+### Een nieuwe versie uitbrengen
+
+```bash
+git tag v1.1.0 && git push origin v1.1.0
+```
+
+De workflow bouwt de APK met dat versienummer erin en hangt hem aan een GitHub Release. De app
+ziet die release vanzelf en biedt hem aan onder *Instellingen → Updates*.
 
 ## Zelf bouwen
 
@@ -104,5 +125,5 @@ zetten alles opnieuw klaar na een herstart of een dag zonder de app te openen.
 
 ## Nog te doen
 
-- Een eigen meldingsgeluid kiezen ín de app (kan nu via de Android-instellingen per medicijn).
 - Export/import van de gegevens als back-up bij een nieuwe telefoon.
+- Een vrije kleurkiezer naast de acht vaste kleuren.
