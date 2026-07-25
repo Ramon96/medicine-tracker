@@ -118,9 +118,23 @@ object DoseNotifier {
         }
         return PendingIntent.getBroadcast(
             context,
-            (intakeId.toInt() and 0xFFFFFF) * 4 + action.hashCode().and(3),
+            requestCodeFor(intakeId, action),
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+    }
+
+    /**
+     * Two bits of action in the low end, the dose id above it. An explicit mapping rather than a
+     * hash, so two buttons on the same notification can never end up sharing a request code.
+     */
+    private fun requestCodeFor(intakeId: Long, action: String): Int {
+        val actionBits = when (action) {
+            IntakeActionReceiver.ACTION_TAKEN -> 0
+            IntakeActionReceiver.ACTION_SNOOZE -> 1
+            IntakeActionReceiver.ACTION_SKIP -> 2
+            else -> 3
+        }
+        return ((intakeId.toInt() and 0x0FFF_FFFF) shl 2) or actionBits
     }
 }
