@@ -100,9 +100,17 @@ jobs:
             exit 1
           fi
           echo "APK: $APK"
+          # apksigner, not keytool: with minSdk 26 AGP signs with APK Signature Scheme v2/v3 and
+          # skips the old v1 JAR signature entirely, so keytool -printcert finds nothing to read
+          # even on a perfectly signed APK.
+          APKSIGNER=$(find "${ANDROID_HOME:-$ANDROID_SDK_ROOT}/build-tools" -name apksigner -type f 2>/dev/null | sort -V | tail -1)
+          if [ -z "$APKSIGNER" ]; then
+            echo "::warning::apksigner not found on this runner; skipping the signature check."
+            exit 0
+          fi
           echo "::group::Signing certificate"
-          keytool -printcert -jarfile "$APK" | grep -E 'Owner:|Valid from:|SHA256:' || {
-            echo "::error::The APK carries no readable signing certificate."
+          "$APKSIGNER" verify --print-certs "$APK" || {
+            echo "::error::The APK is not validly signed."
             exit 1
           }
           echo "::endgroup::"
