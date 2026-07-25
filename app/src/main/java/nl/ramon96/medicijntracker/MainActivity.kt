@@ -34,7 +34,9 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import nl.ramon96.medicijntracker.data.prefs.ThemeSettings
 import nl.ramon96.medicijntracker.di.AppContainer
 import nl.ramon96.medicijntracker.ui.history.HistoryScreen
 import nl.ramon96.medicijntracker.ui.history.HistoryViewModel
@@ -63,7 +65,12 @@ class MainActivity : ComponentActivity() {
 
         val container = MedicijnApp.containerOf(this)
         setContent {
-            MedicijnTheme {
+            // Until DataStore has emitted, render the defaults rather than nothing - otherwise
+            // the app flashes an unstyled frame on every launch.
+            val themeSettings by container.settings.theme
+                .collectAsStateWithLifecycle(initialValue = ThemeSettings())
+
+            MedicijnTheme(settings = themeSettings) {
                 MedicijnAppUi(container)
             }
         }

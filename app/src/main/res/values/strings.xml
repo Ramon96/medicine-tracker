@@ -89,7 +89,12 @@
     <string name="field_snooze_minutes">Snooze (minuten)</string>
     <string name="field_repeat_if_ignored">Nogmaals herinneren</string>
     <string name="field_repeat_if_ignored_hint">Eén extra melding na een half uur als je niets doet.</string>
-    <string name="field_sound_hint">Een eigen meldingsgeluid stel je per medicijn in via de Android-instellingen voor meldingen; elk medicijn heeft daar een eigen kanaal.</string>
+    <string name="field_vibrate">Trillen</string>
+    <string name="field_sound">Meldingsgeluid</string>
+    <string name="field_sound_hint">Elk medicijn kan zijn eigen geluid hebben, zodat je aan het geluid al hoort welke het is.</string>
+    <string name="sound_default">Standaardgeluid</string>
+    <string name="sound_unknown">Gekozen geluid</string>
+    <string name="action_play_sound">Geluid afspelen</string>
 
     <!-- Schema-omschrijvingen -->
     <string name="schedule_daily">Elke dag</string>
@@ -112,6 +117,48 @@
     <string name="settings_snooze_hint">Wordt gebruikt voor nieuwe medicijnen; per medicijn kun je het apart instellen.</string>
     <string name="settings_refill_throttle_hint">Zo vaak mag dezelfde bestelherinnering hooguit terugkomen.</string>
     <string name="settings_version">Versie %1$s</string>
+
+    <!-- Instellingen: secties -->
+    <string name="settings_appearance">Weergave</string>
+    <string name="settings_reminders">Herinneringen</string>
+    <string name="settings_updates">Updates</string>
+
+    <!-- Weergave -->
+    <string name="theme_mode_system">Systeem</string>
+    <string name="theme_mode_light">Licht</string>
+    <string name="theme_mode_dark">Donker</string>
+    <string name="settings_dynamic_color">Kleuren van je achtergrond</string>
+    <string name="settings_dynamic_color_hint">Neemt de kleuren over van je telefoonachtergrond (Android 12 en nieuwer).</string>
+    <string name="settings_palette">Kleur</string>
+    <string name="settings_high_contrast">Extra contrast</string>
+    <string name="settings_high_contrast_hint">Zwart op wit of wit op zwart, met stevigere randen. Handig als je slecht ziet.</string>
+    <string name="settings_text_size">Tekstgrootte: %1$d%%</string>
+    <string name="settings_text_preview">Zo groot wordt de tekst in de app.</string>
+    <string name="settings_font">Lettertype</string>
+    <string name="font_sans">Standaard</string>
+    <string name="font_serif">Serif</string>
+    <string name="font_mono">Mono</string>
+
+    <!-- Updates -->
+    <string name="settings_auto_update">Wekelijks op updates controleren</string>
+    <string name="settings_auto_update_hint">Geeft een seintje zodra er een nieuwe versie is. Downloadt niets vanzelf.</string>
+    <string name="settings_check_updates">Nu controleren</string>
+    <string name="settings_check_again">Opnieuw controleren</string>
+    <string name="settings_checking">Bezig met controleren…</string>
+    <string name="settings_up_to_date">Je hebt de nieuwste versie.</string>
+    <string name="settings_update_available">Versie %1$s is beschikbaar</string>
+    <string name="settings_download_install">Downloaden en installeren</string>
+    <string name="settings_downloading">Bezig met downloaden…</string>
+    <string name="settings_installing">Android neemt het installeren nu over.</string>
+    <string name="update_error_network">Geen verbinding. Probeer het later nog eens.</string>
+    <string name="update_error_rate_limited">GitHub laat even geen controles meer toe. Probeer het over een uur nog eens.</string>
+    <string name="update_error_no_release">Er is nog geen release gepubliceerd.</string>
+    <string name="update_error_no_apk">De nieuwste release bevat geen APK-bestand.</string>
+    <string name="update_error_unknown">Er ging iets mis bij het controleren.</string>
+    <string name="channel_update_name">App-updates</string>
+    <string name="channel_update_description">Bericht wanneer er een nieuwe versie van de app is.</string>
+    <string name="notif_update_title">Nieuwe versie beschikbaar</string>
+    <string name="notif_update_text">Versie %1$s staat klaar. Open Instellingen om bij te werken.</string>
 
     <!-- Meldingen -->
     <string name="channel_medicine_description">Herinnering om dit medicijn in te nemen.</string>

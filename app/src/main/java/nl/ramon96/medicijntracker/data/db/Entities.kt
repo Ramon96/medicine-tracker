@@ -40,6 +40,7 @@ data class MedicineEntity(
     val repeatIfIgnored: Boolean = true,
     val soundUri: String? = null,
     val channelVersion: Int = 1,
+    val vibrate: Boolean = true,
 )
 
 @Entity(

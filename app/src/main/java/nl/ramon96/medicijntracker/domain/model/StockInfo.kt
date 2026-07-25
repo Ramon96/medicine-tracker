@@ -35,4 +35,5 @@ data class ReminderSettings(
      */
     val soundUri: String? = null,
     val channelVersion: Int = 1,
+    val vibrate: Boolean = true,
 )

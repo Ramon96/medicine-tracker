@@ -61,6 +61,7 @@ fun MedicineWithDoseTimes.toDomain(): Medicine = Medicine(
         repeatIfIgnored = medicine.repeatIfIgnored,
         soundUri = medicine.soundUri,
         channelVersion = medicine.channelVersion,
+        vibrate = medicine.vibrate,
     ),
     doseTimes = doseTimes
         .sortedBy { it.minuteOfDay }
@@ -95,6 +96,7 @@ fun Medicine.toEntity(): MedicineEntity = MedicineEntity(
     repeatIfIgnored = reminders.repeatIfIgnored,
     soundUri = reminders.soundUri,
     channelVersion = reminders.channelVersion,
+    vibrate = reminders.vibrate,
 )
 
 fun Medicine.toDoseTimeEntities(): List<DoseTimeEntity> = doseTimes.map {

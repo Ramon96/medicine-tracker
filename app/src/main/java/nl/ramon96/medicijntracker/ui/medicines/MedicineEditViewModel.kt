@@ -40,10 +40,14 @@ class MedicineEditViewModel(
     )
     val state: StateFlow<MedicineEditState> = _state.asStateFlow()
 
+    /** What was loaded from the database, so save can tell which channel settings changed. */
+    private var original: Medicine? = null
+
     init {
         if (medicineId != 0L) {
             viewModelScope.launch {
                 container.medicineRepository.getById(medicineId)?.let { medicine ->
+                    original = medicine
                     _state.value = MedicineEditState(draft = medicine, isNew = false)
                 }
             }
@@ -133,12 +137,29 @@ class MedicineEditViewModel(
     fun setRemindersEnabled(value: Boolean) = edit { copy(reminders = reminders.copy(enabled = value)) }
     fun setSnoozeMinutes(value: Int) = edit { copy(reminders = reminders.copy(snoozeMinutes = value.coerceIn(1, 720))) }
     fun setRepeatIfIgnored(value: Boolean) = edit { copy(reminders = reminders.copy(repeatIfIgnored = value)) }
+    fun setSoundUri(uri: String?) = edit { copy(reminders = reminders.copy(soundUri = uri)) }
+    fun setVibrate(value: Boolean) = edit { copy(reminders = reminders.copy(vibrate = value)) }
 
     fun save() {
         val current = _state.value
         if (!current.canSave) return
         viewModelScope.launch {
-            val id = container.medicineRepository.save(current.draft.copy(name = current.draft.name.trim()))
+            val draft = current.draft.copy(name = current.draft.name.trim())
+
+            // Sound and vibration live on the notification channel, and Android will not let an
+            // existing channel change either one. Bumping the version makes the app register a
+            // fresh channel; without this the new sound is saved but never actually heard.
+            val previous = original?.reminders
+            val channelChanged = previous != null &&
+                (previous.soundUri != draft.reminders.soundUri || previous.vibrate != draft.reminders.vibrate)
+
+            val toSave = if (channelChanged) {
+                draft.copy(reminders = draft.reminders.copy(channelVersion = previous!!.channelVersion + 1))
+            } else {
+                draft
+            }
+
+            val id = container.medicineRepository.save(toSave)
             container.reminderCoordinator.onMedicineSaved(id)
             _state.value = _state.value.copy(saved = true)
         }

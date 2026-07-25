@@ -21,6 +21,7 @@ import nl.ramon96.medicijntracker.domain.model.Medicine
 object NotificationChannels {
 
     const val REFILL_CHANNEL_ID = "refill_v1"
+    const val UPDATE_CHANNEL_ID = "updates_v1"
 
     private const val MEDICINE_CHANNEL_PREFIX = "med_"
 
@@ -38,7 +39,7 @@ object NotificationChannels {
             NotificationManager.IMPORTANCE_HIGH,
         ).apply {
             description = context.getString(R.string.channel_medicine_description)
-            enableVibration(true)
+            enableVibration(medicine.reminders.vibrate)
             setShowBadge(true)
             medicine.reminders.soundUri?.let { uri ->
                 setSound(
@@ -70,6 +71,20 @@ object NotificationChannels {
         ).apply {
             description = context.getString(R.string.channel_refill_description)
             setShowBadge(true)
+        }
+        manager.createNotificationChannel(channel)
+    }
+
+    fun ensureUpdateChannel(context: Context) {
+        val manager = context.getSystemService<NotificationManager>() ?: return
+        val channel = NotificationChannel(
+            UPDATE_CHANNEL_ID,
+            context.getString(R.string.channel_update_name),
+            // A new app version is never urgent enough to interrupt.
+            NotificationManager.IMPORTANCE_LOW,
+        ).apply {
+            description = context.getString(R.string.channel_update_description)
+            setShowBadge(false)
         }
         manager.createNotificationChannel(channel)
     }

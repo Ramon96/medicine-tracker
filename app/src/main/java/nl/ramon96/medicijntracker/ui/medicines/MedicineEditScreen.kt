@@ -4,6 +4,7 @@ import android.app.DatePickerDialog
 import android.app.TimePickerDialog
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -89,7 +90,13 @@ fun MedicineEditScreen(
         item { SectionTitle(stringResource(R.string.section_schedule)) }
 
         item {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            // FlowRow, not Row: the four labels do not fit on one line, and a plain Row squeezes
+            // the last chip off the screen edge instead of wrapping.
+            FlowRow(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(4.dp),
+            ) {
                 ScheduleType.entries.forEach { type ->
                     FilterChip(
                         selected = draft.schedule.type == type,
@@ -112,7 +119,11 @@ fun MedicineEditScreen(
             }
 
             ScheduleType.WEEKDAYS -> item {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(4.dp),
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
+                ) {
                     DayOfWeek.entries.forEach { day ->
                         FilterChip(
                             selected = draft.schedule.weekdayMask and Schedule.bitFor(day) != 0,
@@ -331,9 +342,15 @@ private fun ReminderEditor(viewModel: MedicineEditViewModel, state: MedicineEdit
                 checked = reminders.repeatIfIgnored,
                 onCheckedChange = viewModel::setRepeatIfIgnored,
             )
-            Text(
-                text = stringResource(R.string.field_sound_hint),
-                style = MaterialTheme.typography.bodySmall,
+            SwitchRow(
+                label = stringResource(R.string.field_vibrate),
+                checked = reminders.vibrate,
+                onCheckedChange = viewModel::setVibrate,
+            )
+            SectionTitle(stringResource(R.string.field_sound))
+            SoundPickerRow(
+                soundUri = reminders.soundUri,
+                onSoundChange = viewModel::setSoundUri,
             )
         }
     }

@@ -7,6 +7,8 @@ import nl.ramon96.medicijntracker.data.repo.DoseRepository
 import nl.ramon96.medicijntracker.data.repo.MedicineRepository
 import nl.ramon96.medicijntracker.notify.DoseAlarmScheduler
 import nl.ramon96.medicijntracker.notify.ReminderCoordinator
+import nl.ramon96.medicijntracker.update.UpdateChecker
+import nl.ramon96.medicijntracker.update.UpdateDownloader
 
 /**
  * Hand-rolled dependency container.
@@ -30,6 +32,10 @@ class AppContainer(context: Context) {
     }
 
     val alarmScheduler: DoseAlarmScheduler by lazy { DoseAlarmScheduler(appContext) }
+
+    val updateChecker: UpdateChecker by lazy { UpdateChecker() }
+
+    val updateDownloader: UpdateDownloader by lazy { UpdateDownloader(appContext) }
 
     val reminderCoordinator: ReminderCoordinator by lazy {
         ReminderCoordinator(
