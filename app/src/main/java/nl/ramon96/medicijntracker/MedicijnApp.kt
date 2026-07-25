@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import nl.ramon96.medicijntracker.di.AppContainer
 import nl.ramon96.medicijntracker.notify.DailyMaintenanceWorker
 import nl.ramon96.medicijntracker.notify.NotificationChannels
+import nl.ramon96.medicijntracker.update.UpdateCheckWorker
 
 class MedicijnApp : Application() {
 
@@ -23,6 +24,7 @@ class MedicijnApp : Application() {
 
         NotificationChannels.ensureRefillChannel(this)
         DailyMaintenanceWorker.schedule(this)
+        UpdateCheckWorker.schedule(this)
 
         // Catch up on anything the phone missed while the app was not running.
         appScope.launch { container.reminderCoordinator.refreshAll() }

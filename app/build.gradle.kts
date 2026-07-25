@@ -22,6 +22,19 @@ fun signingValue(propertyName: String, envName: String): String? =
 val releaseStoreFile = signingValue("storeFile", "KEYSTORE_FILE")
 val hasReleaseSigning = releaseStoreFile != null && rootProject.file(releaseStoreFile).exists()
 
+// The version comes from the release tag (CI passes -PappVersionName=v1.2.3). The in-app
+// updater compares version codes, so this has to increase with every release - a hard-coded
+// value would make every build look identical to the one already installed.
+val appVersionName: String =
+    (findProperty("appVersionName") as String?)?.removePrefix("v")?.takeIf { it.isNotBlank() }
+        ?: "1.0.0"
+
+// 1.2.3 -> 10203. Monotonic as long as minor and patch stay below 100.
+val appVersionCode: Int = runCatching {
+    val parts = appVersionName.substringBefore('-').split('.')
+    parts[0].toInt() * 10_000 + parts[1].toInt() * 100 + parts[2].toInt()
+}.getOrDefault(10_000)
+
 android {
     namespace = "nl.ramon96.medicijntracker"
     compileSdk = 37
@@ -30,10 +43,14 @@ android {
         applicationId = "nl.ramon96.medicijntracker"
         minSdk = 26
         targetSdk = 37
-        versionCode = 1
-        versionName = "1.0.0"
+        versionCode = appVersionCode
+        versionName = appVersionName
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Where the in-app updater looks for releases. In one place so a fork only has to
+        // change this line.
+        buildConfigField("String", "UPDATE_REPO", "\"Ramon96/medicine-tracker\"")
     }
 
     signingConfigs {

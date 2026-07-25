@@ -27,6 +27,7 @@ import androidx.glance.layout.fillMaxWidth
 import androidx.glance.layout.height
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
+import androidx.glance.material3.ColorProviders
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
@@ -35,7 +36,9 @@ import kotlinx.coroutines.flow.first
 import nl.ramon96.medicijntracker.MainActivity
 import nl.ramon96.medicijntracker.MedicijnApp
 import nl.ramon96.medicijntracker.R
+import nl.ramon96.medicijntracker.data.prefs.ThemeMode
 import nl.ramon96.medicijntracker.domain.stock.StockForecaster
+import nl.ramon96.medicijntracker.ui.theme.Palettes
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -85,8 +88,21 @@ object TodayWidget : GlanceAppWidget() {
             allDone = open.isEmpty() && doses.isNotEmpty(),
         )
 
+        // The widget sits next to the app on the home screen, so it follows the same palette.
+        val theme = container.settings.currentTheme()
+        val palette = Palettes.byId(theme.paletteId)
+        val lightScheme = Palettes.schemeFor(palette, dark = false, highContrast = theme.highContrast)
+        val darkScheme = Palettes.schemeFor(palette, dark = true, highContrast = theme.highContrast)
+        val colors = when (theme.mode) {
+            // A forced mode has to win here too, otherwise the widget follows the system while
+            // the app does not.
+            ThemeMode.LIGHT -> ColorProviders(light = lightScheme, dark = lightScheme)
+            ThemeMode.DARK -> ColorProviders(light = darkScheme, dark = darkScheme)
+            ThemeMode.SYSTEM -> ColorProviders(light = lightScheme, dark = darkScheme)
+        }
+
         provideContent {
-            GlanceTheme {
+            GlanceTheme(colors = colors) {
                 WidgetContent(context, state)
             }
         }
