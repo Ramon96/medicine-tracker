@@ -16,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
@@ -29,6 +30,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,10 +42,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import nl.ramon96.medicijntracker.R
 import nl.ramon96.medicijntracker.domain.model.Schedule
+import nl.ramon96.medicijntracker.domain.model.Medicine
 import nl.ramon96.medicijntracker.domain.model.ScheduleType
 import nl.ramon96.medicijntracker.ui.common.dateFormatter
+import nl.ramon96.medicijntracker.scan.rememberCodeScanner
+import nl.ramon96.medicijntracker.scan.ScanOutcome
 import nl.ramon96.medicijntracker.ui.common.timeFormatter
 import nl.ramon96.medicijntracker.ui.today.formatAmount
 import java.time.DayOfWeek
@@ -173,6 +182,9 @@ fun MedicineEditScreen(
 
         item { SectionTitle(stringResource(R.string.section_stock)) }
         item { StockEditor(viewModel, state) }
+
+        item { SectionTitle(stringResource(R.string.section_barcodes)) }
+        item { BarcodeEditor(viewModel, state) }
 
         item { SectionTitle(stringResource(R.string.section_reminders)) }
         item { ReminderEditor(viewModel, state) }
@@ -317,7 +329,122 @@ private fun StockEditor(viewModel: MedicineEditViewModel, state: MedicineEditSta
                 text = stringResource(R.string.field_lead_time_hint),
                 style = MaterialTheme.typography.bodySmall,
             )
+            ExpiryRow(viewModel, stock.expiryDate)
         }
+    }
+}
+
+/**
+ * The expiry date of the oldest package. Filled in by scanning a data matrix, but editable and
+ * clearable by hand - once that box is finished the stored date is too pessimistic, and clearing
+ * it is how the user says so.
+ */
+@Composable
+private fun ExpiryRow(viewModel: MedicineEditViewModel, expiryDate: LocalDate?) {
+    val context = LocalContext.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        TextButton(
+            onClick = {
+                showDatePicker(context, expiryDate ?: LocalDate.now()) { viewModel.setExpiryDate(it) }
+            },
+        ) {
+            Text(
+                if (expiryDate == null) stringResource(R.string.field_expiry_none)
+                else stringResource(R.string.field_expiry, expiryDate.format(dateFormatter)),
+            )
+        }
+        if (expiryDate != null) {
+            TextButton(onClick = { viewModel.setExpiryDate(null) }) {
+                Text(stringResource(R.string.action_clear))
+            }
+        }
+    }
+    Text(
+        text = stringResource(R.string.field_expiry_hint),
+        style = MaterialTheme.typography.bodySmall,
+    )
+}
+
+/**
+ * The packages that belong to this medicine.
+ *
+ * More than one is normal: pack sizes differ and the pharmacy switches generic manufacturers, and
+ * every one of those is its own product number for what the user thinks of as one medicine.
+ */
+@Composable
+private fun BarcodeEditor(viewModel: MedicineEditViewModel, state: MedicineEditState) {
+    val scope = rememberCoroutineScope()
+    var relink by remember { mutableStateOf<Pair<String, Medicine>?>(null) }
+
+    val startScan = rememberCodeScanner { outcome ->
+        when (outcome) {
+            is ScanOutcome.Scanned -> outcome.code.gtin?.let { gtin ->
+                scope.launch {
+                    // Codes are unique per medicine, so linking one that belongs elsewhere moves
+                    // it. That is worth asking about rather than doing quietly.
+                    val owner = viewModel.ownerOf(gtin)
+                    if (owner == null) {
+                        viewModel.addBarcode(gtin)
+                        outcome.code.expiry?.let(viewModel::setExpiryDate)
+                    } else {
+                        relink = gtin to owner
+                    }
+                }
+            }
+            is ScanOutcome.Cancelled -> Unit
+            is ScanOutcome.Failed -> Unit
+        }
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = stringResource(R.string.field_barcodes_hint),
+            style = MaterialTheme.typography.bodySmall,
+        )
+        if (state.draft.barcodes.isEmpty()) {
+            Text(stringResource(R.string.barcode_none), style = MaterialTheme.typography.bodyMedium)
+        }
+        state.draft.barcodes.forEach { code ->
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxWidth(),
+            ) {
+                Text(text = code, modifier = Modifier.weight(1f))
+                IconButton(onClick = { viewModel.removeBarcode(code) }) {
+                    Icon(
+                        Icons.Default.Delete,
+                        contentDescription = stringResource(R.string.action_unlink_barcode),
+                    )
+                }
+            }
+        }
+        OutlinedButton(onClick = startScan, modifier = Modifier.fillMaxWidth()) {
+            Text(stringResource(R.string.action_link_barcode))
+        }
+    }
+
+    relink?.let { (code, owner) ->
+        AlertDialog(
+            onDismissRequest = { relink = null },
+            title = { Text(stringResource(R.string.scan_relink_title)) },
+            text = {
+                Text(stringResource(R.string.scan_relink_body, owner.name, state.draft.name))
+            },
+            confirmButton = {
+                TextButton(onClick = { viewModel.addBarcode(code); relink = null }) {
+                    Text(stringResource(R.string.action_move_barcode))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { relink = null }) {
+                    Text(stringResource(R.string.action_cancel))
+                }
+            },
+        )
     }
 }
 

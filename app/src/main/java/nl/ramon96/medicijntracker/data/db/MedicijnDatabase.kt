@@ -9,8 +9,13 @@ import androidx.sqlite.SQLiteConnection
 import androidx.sqlite.execSQL
 
 @Database(
-    entities = [MedicineEntity::class, DoseTimeEntity::class, IntakeEntity::class],
-    version = 2,
+    entities = [
+        MedicineEntity::class,
+        DoseTimeEntity::class,
+        IntakeEntity::class,
+        MedicineBarcodeEntity::class,
+    ],
+    version = 3,
     exportSchema = true,
 )
 abstract class MedicijnDatabase : RoomDatabase() {
@@ -28,6 +33,37 @@ abstract class MedicijnDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * Barcode scanning: the codes found on a package, and the expiry date read off it.
+         *
+         * The statements below have to match what Room generates for the entities byte for byte,
+         * or the app refuses to open the database on the first launch after an update - which
+         * means someone loses access to their medication list. They were taken from the generated
+         * `app/schemas/.../3.json`; if the entities change, regenerate and copy them again rather
+         * than editing by hand.
+         */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(connection: SQLiteConnection) {
+                connection.execSQL("ALTER TABLE medicine ADD COLUMN expiryDate TEXT")
+                connection.execSQL(
+                    "CREATE TABLE IF NOT EXISTS `medicine_barcode` (" +
+                        "`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`medicineId` INTEGER NOT NULL, " +
+                        "`code` TEXT NOT NULL, " +
+                        "FOREIGN KEY(`medicineId`) REFERENCES `medicine`(`id`) " +
+                        "ON UPDATE NO ACTION ON DELETE CASCADE )",
+                )
+                connection.execSQL(
+                    "CREATE INDEX IF NOT EXISTS `index_medicine_barcode_medicineId` " +
+                        "ON `medicine_barcode` (`medicineId`)",
+                )
+                connection.execSQL(
+                    "CREATE UNIQUE INDEX IF NOT EXISTS `index_medicine_barcode_code` " +
+                        "ON `medicine_barcode` (`code`)",
+                )
+            }
+        }
+
         @Volatile
         private var instance: MedicijnDatabase? = null
 
@@ -38,7 +74,7 @@ abstract class MedicijnDatabase : RoomDatabase() {
                     MedicijnDatabase::class.java,
                     "medicijnen.db",
                 )
-                    .addMigrations(MIGRATION_1_2)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                     // Foreign keys drive the cascade delete of dose times and intakes.
                     .build()
                     .also { instance = it }

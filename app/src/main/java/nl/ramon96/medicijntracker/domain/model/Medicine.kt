@@ -33,6 +33,15 @@ data class Medicine(
     val stock: StockInfo = StockInfo(),
     val reminders: ReminderSettings = ReminderSettings(),
     val doseTimes: List<DoseTime> = emptyList(),
+    /**
+     * Product numbers of the packages this medicine comes in, canonical GTIN-14, as produced by
+     * [nl.ramon96.medicijntracker.domain.barcode.Gs1Parser].
+     *
+     * A list rather than a single code: the pharmacy hands out different pack sizes and switches
+     * between generic manufacturers, and each of those is its own product number for the same
+     * medicine. Scanning any of them has to recognise it.
+     */
+    val barcodes: List<String> = emptyList(),
 ) {
     /** Total units taken on a day this medicine is due. */
     val unitsPerDosingDay: Double get() = doseTimes.sumOf { it.amount }

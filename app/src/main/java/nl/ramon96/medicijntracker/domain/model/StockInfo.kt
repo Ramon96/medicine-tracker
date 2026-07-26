@@ -21,6 +21,16 @@ data class StockInfo(
     val trackingEnabled: Boolean = false,
     /** Last day an "order now" notification was shown, used to avoid nagging daily. */
     val lastAlertDate: LocalDate? = null,
+    /**
+     * Expiry of the oldest package in the house, read from a scanned GS1 code or typed in.
+     *
+     * One date rather than one per package: [count] is a single running total, so there is no way
+     * to tell which box a pill came from without tracking every package separately - which would
+     * mean picking a package on every dose taken, including from the widget and the notification
+     * buttons. The cost of the simpler version is that this date stays pessimistic once the oldest
+     * box is finished, until the next box is scanned or the date is cleared by hand.
+     */
+    val expiryDate: LocalDate? = null,
 )
 
 /** Notification behaviour per medicine. */

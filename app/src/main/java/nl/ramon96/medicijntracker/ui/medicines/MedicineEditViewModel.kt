@@ -14,9 +14,25 @@ import nl.ramon96.medicijntracker.domain.model.DoseTime
 import nl.ramon96.medicijntracker.domain.model.Medicine
 import nl.ramon96.medicijntracker.domain.model.Schedule
 import nl.ramon96.medicijntracker.domain.model.ScheduleType
+import nl.ramon96.medicijntracker.domain.stock.ExpiryWatcher
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.LocalTime
+
+/**
+ * What a scan already knows before the form opens.
+ *
+ * Passed as navigation arguments rather than held in shared state, so returning to the form after
+ * a process death cannot resurrect a stale scan.
+ */
+data class ScanPrefill(
+    val gtin: String? = null,
+    val expiry: LocalDate? = null,
+    val name: String? = null,
+    val dosage: String? = null,
+) {
+    val isEmpty: Boolean get() = gtin == null && expiry == null && name == null && dosage == null
+}
 
 /** The add/edit form state: one editable copy of the medicine plus validation. */
 data class MedicineEditState(
@@ -33,10 +49,15 @@ data class MedicineEditState(
 class MedicineEditViewModel(
     private val container: AppContainer,
     private val medicineId: Long,
+    private val prefill: ScanPrefill? = null,
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        MedicineEditState(draft = emptyDraft(), isNew = medicineId == 0L, loading = medicineId != 0L),
+        MedicineEditState(
+            draft = emptyDraft().withPrefill(prefill),
+            isNew = medicineId == 0L,
+            loading = medicineId != 0L,
+        ),
     )
     val state: StateFlow<MedicineEditState> = _state.asStateFlow()
 
@@ -47,8 +68,10 @@ class MedicineEditViewModel(
         if (medicineId != 0L) {
             viewModelScope.launch {
                 container.medicineRepository.getById(medicineId)?.let { medicine ->
+                    // original stays un-prefilled: it is what is in the database, and save()
+                    // compares against it to decide whether the notification channel changed.
                     original = medicine
-                    _state.value = MedicineEditState(draft = medicine, isNew = false)
+                    _state.value = MedicineEditState(draft = medicine.withPrefill(prefill), isNew = false)
                 }
             }
         }
@@ -130,7 +153,21 @@ class MedicineEditViewModel(
     fun setStockCount(value: Double) = edit { copy(stock = stock.copy(count = value.coerceAtLeast(0.0))) }
     fun setUnitsPerPackage(value: Double) = edit { copy(stock = stock.copy(unitsPerPackage = value.coerceAtLeast(0.0))) }
     fun setLeadTimeDays(value: Int) = edit { copy(stock = stock.copy(leadTimeDays = value.coerceIn(0, 365))) }
+    fun setExpiryDate(date: LocalDate?) = edit { copy(stock = stock.copy(expiryDate = date)) }
     fun setBufferDays(value: Int) = edit { copy(stock = stock.copy(bufferDays = value.coerceIn(0, 365))) }
+
+    // --- barcodes ----------------------------------------------------------
+
+    fun addBarcode(code: String) = edit { copy(barcodes = (barcodes + code).distinct()) }
+
+    fun removeBarcode(code: String) = edit { copy(barcodes = barcodes - code) }
+
+    /**
+     * Which other medicine currently owns a code, so the form can ask before taking it away.
+     * The unique index on the barcode table means saving would move it either way.
+     */
+    suspend fun ownerOf(code: String): Medicine? =
+        container.medicineRepository.findByBarcode(code)?.takeIf { it.id != medicineId }
 
     // --- reminders ---------------------------------------------------------
 
@@ -173,9 +210,31 @@ class MedicineEditViewModel(
             doseTimes = listOf(DoseTime(time = LocalTime.of(8, 0))),
         )
 
-        fun factory(container: AppContainer, medicineId: Long): ViewModelProvider.Factory =
+        /**
+         * A scan fills in what it could read: the code itself always, plus a name and expiry date
+         * when the box carried them. Stock tracking is switched on for a new medicine because
+         * scanning a package is a statement that the count matters.
+         */
+        private fun Medicine.withPrefill(prefill: ScanPrefill?): Medicine {
+            if (prefill == null || prefill.isEmpty) return this
+            return copy(
+                name = prefill.name?.takeIf { name.isBlank() } ?: name,
+                dosage = prefill.dosage?.takeIf { dosage.isBlank() } ?: dosage,
+                barcodes = (barcodes + listOfNotNull(prefill.gtin)).distinct(),
+                stock = stock.copy(
+                    trackingEnabled = stock.trackingEnabled || id == 0L,
+                    expiryDate = ExpiryWatcher.merge(stock.expiryDate, prefill.expiry),
+                ),
+            )
+        }
+
+        fun factory(
+            container: AppContainer,
+            medicineId: Long,
+            prefill: ScanPrefill? = null,
+        ): ViewModelProvider.Factory =
             viewModelFactory {
-                initializer { MedicineEditViewModel(container, medicineId) }
+                initializer { MedicineEditViewModel(container, medicineId, prefill) }
             }
     }
 }

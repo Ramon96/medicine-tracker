@@ -3,6 +3,7 @@ package nl.ramon96.medicijntracker.data.repo
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import nl.ramon96.medicijntracker.data.db.MedicineDao
+import nl.ramon96.medicijntracker.data.db.toBarcodeEntities
 import nl.ramon96.medicijntracker.data.db.toDb
 import nl.ramon96.medicijntracker.data.db.toDoseTimeEntities
 import nl.ramon96.medicijntracker.data.db.toDomain
@@ -24,9 +25,22 @@ class MedicineRepository(private val medicineDao: MedicineDao) {
 
     suspend fun getActive(): List<Medicine> = medicineDao.getActive().map { it.toDomain() }
 
-    /** Inserts or updates the medicine together with its dose times; returns its id. */
+    /**
+     * Inserts or updates the medicine together with its dose times and barcodes; returns its id.
+     *
+     * This is the only place barcodes are written. Everything else - the scan sheet included -
+     * goes through [adjustStock] and [setExpiryDate], because the save below replaces the whole
+     * set of codes and would drop anything linked elsewhere in the meantime.
+     */
     suspend fun save(medicine: Medicine): Long =
-        medicineDao.save(medicine.toEntity(), medicine.toDoseTimeEntities())
+        medicineDao.save(medicine.toEntity(), medicine.toDoseTimeEntities(), medicine.toBarcodeEntities())
+
+    /** Which medicine a scanned package belongs to, or null the first time it is seen. */
+    suspend fun findByBarcode(code: String): Medicine? =
+        medicineDao.findMedicineIdByBarcode(code)?.let { getById(it) }
+
+    suspend fun setExpiryDate(medicineId: Long, date: LocalDate?) =
+        medicineDao.setExpiryDate(medicineId, date?.toDb())
 
     suspend fun delete(medicine: Medicine) = medicineDao.delete(medicine.toEntity())
 

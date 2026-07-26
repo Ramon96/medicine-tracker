@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -51,6 +52,7 @@ import nl.ramon96.medicijntracker.ui.common.timeFormatter
 fun TodayScreen(
     viewModel: TodayViewModel,
     onAddMedicine: () -> Unit,
+    onScan: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -79,8 +81,16 @@ fun TodayScreen(
 
         item { PermissionCard(permissionStatus) }
 
+        items(state.expiryWarnings, key = { "expiry-${it.medicine.id}" }) { warning ->
+            ExpiryCard(warning = warning, onFinished = { viewModel.clearExpiry(warning.medicine) })
+        }
+
         items(state.refillWarnings, key = { "refill-${it.medicine.id}" }) { warning ->
-            RefillCard(warning = warning, onOrdered = { viewModel.addPackage(warning.medicine) })
+            RefillCard(
+                warning = warning,
+                onOrdered = { viewModel.addPackage(warning.medicine) },
+                onScan = onScan,
+            )
         }
 
         if (!state.hasMedicines) {
@@ -208,7 +218,7 @@ private fun SettledDoseRow(item: IntakeWithMedicine, onUndo: () -> Unit) {
 }
 
 @Composable
-private fun RefillCard(warning: RefillWarning, onOrdered: () -> Unit) {
+private fun RefillCard(warning: RefillWarning, onOrdered: () -> Unit, onScan: () -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
@@ -235,10 +245,65 @@ private fun RefillCard(warning: RefillWarning, onOrdered: () -> Unit) {
                 ),
                 style = MaterialTheme.typography.bodyMedium,
             )
-            if (warning.medicine.stock.unitsPerPackage > 0) {
-                FilledTonalButton(onClick = onOrdered) {
-                    Text(stringResource(R.string.refill_received_package))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                if (warning.medicine.stock.unitsPerPackage > 0) {
+                    FilledTonalButton(onClick = onOrdered) {
+                        Text(stringResource(R.string.refill_received_package))
+                    }
                 }
+                // The moment a new box arrives is exactly when scanning it is worth the trouble.
+                FilledTonalButton(onClick = onScan) {
+                    Text(stringResource(R.string.action_scan_package))
+                }
+            }
+        }
+    }
+}
+
+/**
+ * The box goes off before it is finished - something a stock count on its own never notices.
+ *
+ * "Dit doosje is op" clears the date as well as the warning: the stored date belongs to the
+ * oldest package, so once that is gone the date is simply wrong.
+ */
+@Composable
+private fun ExpiryCard(warning: ExpiryWarning, onFinished: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.errorContainer,
+            contentColor = MaterialTheme.colorScheme.onErrorContainer,
+        ),
+    ) {
+        Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.WarningAmber, contentDescription = null)
+                Text(
+                    text = if (warning.risk.alreadyExpired) {
+                        stringResource(
+                            R.string.expiry_card_expired,
+                            warning.medicine.name,
+                            warning.risk.expiryDate.format(dateFormatter),
+                        )
+                    } else {
+                        stringResource(R.string.expiry_card_title, warning.medicine.name)
+                    },
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(start = 8.dp),
+                )
+            }
+            warning.risk.runOutDate?.takeIf { !warning.risk.alreadyExpired }?.let { runOut ->
+                Text(
+                    text = stringResource(
+                        R.string.expiry_card_body,
+                        warning.risk.expiryDate.format(dateFormatter),
+                        runOut.format(dateFormatter),
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
+            FilledTonalButton(onClick = onFinished) {
+                Text(stringResource(R.string.action_package_finished))
             }
         }
     }

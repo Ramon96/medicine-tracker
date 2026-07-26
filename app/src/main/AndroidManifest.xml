@@ -6,9 +6,21 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Only used to look for and download a new version of the app itself. -->
+    <!--
+        Used to look for and download a new version of the app itself, and - only when the user
+        leaves that setting on - to look up an unrecognised barcode in a public product database.
+    -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+
+    <!--
+        Barcode scanning runs inside Google Play services, which owns the camera for the duration
+        of the scan, so this app needs no CAMERA permission. The feature is optional: phones
+        without Play services keep every manual path.
+    -->
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="false" />
 
     <!--
         Medication reminders are one of the use cases Android explicitly allows exact alarms
@@ -48,6 +60,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!--
+            Fetches the scanner module ahead of time, so the first scan does not stall on a
+            download in the pharmacy car park.
+        -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="barcode_ui" />
 
         <receiver
             android:name=".notify.DoseAlarmReceiver"

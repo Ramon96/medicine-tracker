@@ -45,6 +45,7 @@ class AppSettings(private val context: Context) {
         val font = stringPreferencesKey("font")
 
         val autoUpdateCheck = booleanPreferencesKey("auto_update_check")
+        val barcodeLookup = booleanPreferencesKey("barcode_lookup")
     }
 
     private inline fun <reified T : Enum<T>> String?.toEnumOr(fallback: T): T =
@@ -61,6 +62,17 @@ class AppSettings(private val context: Context) {
 
     val autoUpdateCheck: Flow<Boolean> =
         context.dataStore.data.map { it[Keys.autoUpdateCheck] ?: true }
+
+    /**
+     * Whether an unrecognised barcode may be looked up online.
+     *
+     * Worth its own switch: the code identifies a specific medicine, so sending it to a public
+     * database says something about the person holding the box. With this off the app still
+     * scans, recognises packages it has seen before, and reads expiry dates - all of that happens
+     * on the phone.
+     */
+    val barcodeLookup: Flow<Boolean> =
+        context.dataStore.data.map { it[Keys.barcodeLookup] ?: true }
 
     /** Read as a single object so the theme recomposes once per change, not six times. */
     val theme: Flow<ThemeSettings> = context.dataStore.data.map { prefs ->
@@ -90,6 +102,10 @@ class AppSettings(private val context: Context) {
         context.dataStore.edit { it[Keys.autoUpdateCheck] = enabled }
     }
 
+    suspend fun setBarcodeLookup(enabled: Boolean) {
+        context.dataStore.edit { it[Keys.barcodeLookup] = enabled }
+    }
+
     suspend fun setThemeMode(mode: ThemeMode) {
         context.dataStore.edit { it[Keys.themeMode] = mode.name }
     }
@@ -115,6 +131,8 @@ class AppSettings(private val context: Context) {
     }
 
     suspend fun currentRefillThrottleDays(): Int = refillThrottleDays.first()
+
+    suspend fun currentBarcodeLookup(): Boolean = barcodeLookup.first()
 
     suspend fun currentTheme(): ThemeSettings = theme.first()
 

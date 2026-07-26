@@ -3,8 +3,9 @@
 Daily medication reminders, plus something most trackers miss: it tells you when to **reorder**,
 working backwards from how long your pharmacy takes to deliver.
 
-Everything stays on the phone. No account, no server, no analytics. The only time it touches the
-internet is to check whether a newer version of the app exists, and you can turn that off.
+Everything stays on the phone. No account, no server, no analytics. It touches the internet for
+two things only — checking whether a newer version exists, and looking up a barcode you scanned
+that it doesn't recognise — and both can be switched off.
 
 > **The app's interface is in Dutch.** The code and this README are in English. If you'd find an
 > English UI useful, the strings all live in `app/src/main/res/values/strings.xml`.
@@ -59,6 +60,40 @@ plus a nightly maintenance pass. Each notification carries **Ingenomen** (taken)
 Each medicine can have its own notification sound and vibration setting, with a preview button —
 so you can tell from the sound alone which medicine is due.
 
+### Scanning the box
+
+Point the camera at a medicine box and the app reads its barcode. What happens next depends on
+whether it has seen that box before:
+
+- **A box it knows** — it says so straight away and offers to add a package to the stock, filled in
+  with the pack size you set. One tap and the refill is logged.
+- **A box it doesn't know** — it offers what it could find and lets you fill in the rest, then
+  remembers the code so the next scan of that box is recognised.
+
+The scanner runs inside Google Play services, so **the app never asks for camera permission** — Play
+services opens the camera itself and hands back only the decoded number. On a phone without Play
+services scanning is unavailable and everything can still be filled in by hand.
+
+#### What a barcode can and cannot tell you
+
+Since February 2019 every EU prescription pack carries a GS1 DataMatrix under the Falsified
+Medicines Directive. It contains a product number, a serial, a batch, and an **expiry date** — but
+deliberately **not the product name**. Turning a product number into "Paracetamol 500 mg, 20
+tabletten" needs the G-Standaard from Z-Index, the database every Dutch pharmacy runs on, which
+costs thousands of euros a year and cannot be redistributed inside an APK.
+
+So the app does the honest thing instead: it learns each box the first time and recognises it
+forever after. That covers the case that actually repeats — refills. For an unknown code it will
+ask Open Products Facts, a free public database, but coverage of pharmacy products is thin and
+anything it returns is shown as a suggestion to check against the box, never saved on its own.
+
+### Expiry dates
+
+The DataMatrix gives the expiry date for free, so the app stores it and warns when a box will go
+over its date **before you finish it** — which counting pills alone never notices. There is one date
+per medicine, belonging to the oldest package in the house; "Dit doosje is op" clears it when that
+box is gone.
+
 ### Reordering before you run out
 
 This is the part worth explaining. Fill in three things per medicine: how many units you have,
@@ -109,9 +144,19 @@ once a week in the background. It never downloads anything without being asked.
 ## Privacy
 
 The database lives on the phone and nowhere else. There is no account, no telemetry, and no
-cloud sync. The `INTERNET` permission is used for exactly one thing: asking GitHub whether a
-newer release exists. Turn off the weekly check and the app makes no network requests at all
-unless you press the button yourself.
+cloud sync. The `INTERNET` permission is used for exactly two things:
+
+1. Asking GitHub whether a newer release exists.
+2. Looking up a scanned barcode that the app does not recognise.
+
+The second one is worth being explicit about: a barcode identifies a specific medicine, so sending
+it to a public database says something about what is in your house. **Instellingen → Scannen** turns
+it off. With it off, scanning still works completely — recognising boxes you have already linked and
+reading expiry dates both happen on the phone.
+
+Turn off both that and the weekly update check and the app makes no network requests at all unless
+you press a button yourself. Scanning itself never needs the network: the camera is handled by
+Google Play services on the device.
 
 ---
 
@@ -131,6 +176,9 @@ Opening the project folder in Android Studio also just works.
 ```
 domain/schedule/ScheduleCalculator   when a medicine is due (pure Kotlin, unit-tested)
 domain/stock/StockForecaster         when to reorder (pure Kotlin, unit-tested)
+domain/stock/ExpiryWatcher           expiry vs run-out date (pure Kotlin, unit-tested)
+domain/barcode/Gs1Parser             GS1 DataMatrix / EAN decoding (pure Kotlin, unit-tested)
+scan/                                Play services scanner and the product lookup
 update/AppVersion                    release-tag → version comparison (pure Kotlin, unit-tested)
 data/db, data/repo                   Room database and repositories
 notify/                              alarms, notifications, reboot recovery, daily maintenance
@@ -188,5 +236,7 @@ GitHub Release, where the in-app updater picks it up.
 ## Not there yet
 
 - Export/import, for moving to a new phone without losing history.
+- Per-package expiry tracking. Today there is one date per medicine, so it stays pessimistic until
+  the oldest box is scanned out or the date is cleared by hand.
 - A free colour picker alongside the eight presets.
 - An English translation of the interface.

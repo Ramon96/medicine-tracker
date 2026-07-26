@@ -44,6 +44,9 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     val theme: StateFlow<ThemeSettings> = container.settings.theme
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), ThemeSettings())
 
+    val barcodeLookup: StateFlow<Boolean> = container.settings.barcodeLookup
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
+
     val autoUpdateCheck: StateFlow<Boolean> = container.settings.autoUpdateCheck
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), true)
 
@@ -68,6 +71,9 @@ class SettingsViewModel(private val container: AppContainer) : ViewModel() {
     fun setHighContrast(on: Boolean) = viewModelScope.launch { container.settings.setHighContrast(on) }
     fun setTextScale(scale: Float) = viewModelScope.launch { container.settings.setTextScale(scale) }
     fun setFont(font: AppFont) = viewModelScope.launch { container.settings.setFont(font) }
+
+    fun setBarcodeLookup(enabled: Boolean) =
+        viewModelScope.launch { container.settings.setBarcodeLookup(enabled) }
 
     // --- updates -----------------------------------------------------------
 

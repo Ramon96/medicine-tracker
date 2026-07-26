@@ -17,17 +17,23 @@ import nl.ramon96.medicijntracker.di.AppContainer
 import nl.ramon96.medicijntracker.domain.model.IntakeStatus
 import nl.ramon96.medicijntracker.domain.model.IntakeWithMedicine
 import nl.ramon96.medicijntracker.domain.model.Medicine
+import nl.ramon96.medicijntracker.domain.stock.ExpiryRisk
+import nl.ramon96.medicijntracker.domain.stock.ExpiryWatcher
 import nl.ramon96.medicijntracker.domain.stock.RefillForecast
 import nl.ramon96.medicijntracker.domain.stock.StockForecaster
 import java.time.LocalDate
 
 data class RefillWarning(val medicine: Medicine, val forecast: RefillForecast)
 
+/** A package that will be over its date before it is finished, or already is. */
+data class ExpiryWarning(val medicine: Medicine, val risk: ExpiryRisk)
+
 data class TodayUiState(
     val date: LocalDate = LocalDate.now(),
     val open: List<IntakeWithMedicine> = emptyList(),
     val done: List<IntakeWithMedicine> = emptyList(),
     val refillWarnings: List<RefillWarning> = emptyList(),
+    val expiryWarnings: List<ExpiryWarning> = emptyList(),
     val hasMedicines: Boolean = true,
 ) {
     val nextDose: IntakeWithMedicine? get() = open.minByOrNull { it.intake.remindAt }
@@ -56,6 +62,10 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
                     refillWarnings = medicines.mapNotNull { medicine ->
                         val forecast = StockForecaster.forecast(medicine, day)
                         RefillWarning(medicine, forecast).takeIf { forecast.shouldOrderNow }
+                    },
+                    expiryWarnings = medicines.mapNotNull { medicine ->
+                        val risk = ExpiryWatcher.risk(medicine, day) ?: return@mapNotNull null
+                        ExpiryWarning(medicine, risk).takeIf { risk.worthWarningAbout }
                     },
                     hasMedicines = medicines.isNotEmpty(),
                 )
@@ -94,10 +104,16 @@ class TodayViewModel(private val container: AppContainer) : ViewModel() {
         container.reminderCoordinator.snooze(intakeId, minutes)
     }
 
+    /** "Dit doosje is op" - the stored expiry date belonged to a box that no longer exists. */
+    fun clearExpiry(medicine: Medicine) = viewModelScope.launch {
+        container.medicineRepository.setExpiryDate(medicine.id, null)
+    }
+
     /** "Nieuwe verpakking ontvangen" - puts a full package back into stock. */
     fun addPackage(medicine: Medicine) = viewModelScope.launch {
         val units = medicine.stock.unitsPerPackage.takeIf { it > 0 } ?: return@launch
         container.medicineRepository.adjustStock(medicine.id, units)
+        container.reminderCoordinator.onStockChanged()
     }
 
     companion object {

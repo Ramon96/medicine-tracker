@@ -122,6 +122,59 @@
     <string name="settings_appearance">Weergave</string>
     <string name="settings_reminders">Herinneringen</string>
     <string name="settings_updates">Updates</string>
+    <string name="settings_scanning">Scannen</string>
+
+    <!-- Scannen: doosjes herkennen -->
+    <string name="action_scan">Doosje scannen</string>
+    <string name="action_scan_package">Verpakking scannen</string>
+    <string name="scan_recognised_title">%1$s herkend</string>
+    <string name="scan_add_amount">Hoeveel stuks komen erbij?</string>
+    <string name="scan_stock_now">Voorraad nu: %1$s</string>
+    <string name="scan_stock_after">Na toevoegen: %1$s</string>
+    <string name="action_add_to_stock">Toevoegen</string>
+    <string name="scan_expiry_found">Op het doosje staat: houdbaar tot %1$s</string>
+    <string name="scan_looking_up">Even kijken of we dit doosje kennen…</string>
+    <string name="action_skip_lookup">Overslaan</string>
+
+    <string name="scan_suggestion_title">Misschien gevonden</string>
+    <string name="scan_suggestion_hint">Dit komt uit een openbare database die lang niet alle medicijnen kent en er soms naast zit. Controleer het even met het doosje in je hand.</string>
+    <string name="action_use_suggestion">Overnemen</string>
+    <string name="action_fill_myself">Zelf invullen</string>
+
+    <string name="scan_unknown_title">Dit doosje kennen we nog niet</string>
+    <string name="scan_unknown_body">De code is gelezen. Maak er een nieuw medicijn van of koppel hem aan een medicijn dat je al hebt — daarna wordt dit doosje meteen herkend.</string>
+    <string name="action_new_from_scan">Nieuw medicijn maken</string>
+    <string name="action_link_existing">Koppelen aan een bestaand medicijn</string>
+    <string name="scan_unreadable">De code kon niet gelezen worden. Je kunt het medicijn met de hand invullen.</string>
+    <string name="scan_relink_title">Code verplaatsen?</string>
+    <string name="scan_relink_body">Deze code hoort nu bij %1$s. Wil je hem voortaan bij %2$s laten horen?</string>
+    <string name="action_move_barcode">Verplaatsen</string>
+
+    <string name="scan_error_play_services">Scannen werkt alleen met Google Play-services. Vul het medicijn met de hand in.</string>
+    <string name="scan_error_module">De scanner wordt nog gedownload. Zorg even voor internet en probeer het daarna opnieuw.</string>
+    <string name="scan_error_camera">De camera kon niet worden geopend.</string>
+    <string name="scan_error_unknown">Er ging iets mis bij het scannen.</string>
+    <string name="lookup_error_network">Geen verbinding, dus we konden het doosje niet opzoeken.</string>
+    <string name="lookup_error_rate_limited">De database laat nu even geen aanvragen meer toe.</string>
+    <string name="lookup_error_unknown">Opzoeken lukte niet.</string>
+
+    <string name="settings_barcode_lookup">Onbekende doosjes online opzoeken</string>
+    <string name="settings_barcode_lookup_hint">Staat dit uit, dan blijft alles op je telefoon: scannen, doosjes herkennen die je eerder hebt gekoppeld en houdbaarheidsdatums lezen werken gewoon door. Staat het aan, dan wordt bij een onbekende code alleen dat nummer naar een openbare productdatabase gestuurd.</string>
+
+    <!-- Barcodes en houdbaarheid in het formulier -->
+    <string name="section_barcodes">Barcodes</string>
+    <string name="field_barcodes_hint">Scan de doosjes die bij dit medicijn horen. Er mogen er meerdere zijn, bijvoorbeeld een grote en een kleine verpakking.</string>
+    <string name="action_link_barcode">Barcode koppelen</string>
+    <string name="barcode_none">Nog geen barcode gekoppeld.</string>
+    <string name="action_unlink_barcode">Barcode loskoppelen</string>
+
+    <string name="field_expiry">Houdbaar tot %1$s</string>
+    <string name="field_expiry_none">Houdbaarheidsdatum onbekend</string>
+    <string name="field_expiry_hint">Wordt vanzelf ingevuld als je een doosje met een datamatrixcode scant.</string>
+    <string name="expiry_card_title">%1$s is eerder over de datum dan op</string>
+    <string name="expiry_card_body">Houdbaar tot %1$s, maar je doet er nog tot %2$s mee. Vraag de apotheek om een nieuw doosje.</string>
+    <string name="expiry_card_expired">%1$s is over de datum (%2$s).</string>
+    <string name="action_package_finished">Dit doosje is op</string>
 
     <!-- Weergave -->
     <string name="theme_mode_system">Systeem</string>

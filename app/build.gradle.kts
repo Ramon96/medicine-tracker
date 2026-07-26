@@ -131,6 +131,24 @@ dependencies {
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material3)
 
+    // Barcode scanning. This is only the thin client: the scanner UI and the model live in a
+    // Google Play services module that is downloaded on demand, which is also why the app needs
+    // no CAMERA permission of its own.
+    implementation(libs.play.services.code.scanner)
+
+    // Play services drags in a fragment version older than 1.3.0, which makes lint reject the
+    // ActivityResult API the notification permission already uses. Nothing here uses fragments;
+    // this only raises the floor of what gets resolved.
+    constraints {
+        implementation(libs.androidx.fragment) {
+            because("ActivityResult APIs require androidx.fragment 1.3.0 or newer")
+        }
+    }
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
+    // org.json ships inside android.jar, where every method throws under unit tests. The real
+    // implementation on the test classpath is what lets the barcode lookup's response parsing be
+    // tested without a device.
+    testImplementation(libs.json)
 }

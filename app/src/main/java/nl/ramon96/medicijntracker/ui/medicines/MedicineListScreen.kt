@@ -13,10 +13,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.SmallFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -43,6 +45,7 @@ import nl.ramon96.medicijntracker.ui.today.formatAmount
 fun MedicineListScreen(
     viewModel: MedicineListViewModel,
     onEdit: (Long) -> Unit,
+    onScan: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val rows by viewModel.medicines.collectAsStateWithLifecycle()
@@ -65,11 +68,20 @@ fun MedicineListScreen(
             }
         }
 
-        FloatingActionButton(
-            onClick = { onEdit(0L) },
+        Column(
             modifier = Modifier.align(Alignment.BottomEnd).padding(16.dp),
+            horizontalAlignment = Alignment.End,
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add_medicine))
+            SmallFloatingActionButton(onClick = onScan) {
+                Icon(
+                    Icons.Default.QrCodeScanner,
+                    contentDescription = stringResource(R.string.action_scan),
+                )
+            }
+            FloatingActionButton(onClick = { onEdit(0L) }) {
+                Icon(Icons.Default.Add, contentDescription = stringResource(R.string.action_add_medicine))
+            }
         }
     }
 

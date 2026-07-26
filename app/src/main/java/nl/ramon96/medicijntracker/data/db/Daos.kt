@@ -45,16 +45,37 @@ interface MedicineDao {
     @Insert
     suspend fun insertDoseTimes(doseTimes: List<DoseTimeEntity>)
 
+    @Query("DELETE FROM medicine_barcode WHERE medicineId = :medicineId")
+    suspend fun deleteBarcodesFor(medicineId: Long)
+
     /**
-     * Saves the medicine and replaces its dose times in one transaction, so a screen never sees
-     * a medicine with half its schedule.
+     * REPLACE rather than the default ABORT: `code` is unique, so re-linking a package that was
+     * attached to the wrong medicine would otherwise throw out of the edit screen's save and look
+     * like the form silently failing. Replacing moves the code instead - the UI confirms with the
+     * user before that happens.
+     */
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertBarcodes(barcodes: List<MedicineBarcodeEntity>)
+
+    @Query("SELECT medicineId FROM medicine_barcode WHERE code = :code LIMIT 1")
+    suspend fun findMedicineIdByBarcode(code: String): Long?
+
+    /**
+     * Saves the medicine and replaces its dose times and barcodes in one transaction, so a screen
+     * never sees a medicine with half its schedule.
      */
     @Transaction
-    suspend fun save(medicine: MedicineEntity, doseTimes: List<DoseTimeEntity>): Long {
+    suspend fun save(
+        medicine: MedicineEntity,
+        doseTimes: List<DoseTimeEntity>,
+        barcodes: List<MedicineBarcodeEntity>,
+    ): Long {
         val id = upsert(medicine)
         val medicineId = if (medicine.id == 0L) id else medicine.id
         deleteDoseTimesFor(medicineId)
         insertDoseTimes(doseTimes.map { it.copy(id = 0, medicineId = medicineId) })
+        deleteBarcodesFor(medicineId)
+        insertBarcodes(barcodes.map { it.copy(id = 0, medicineId = medicineId) })
         return medicineId
     }
 
@@ -63,6 +84,9 @@ interface MedicineDao {
 
     @Query("UPDATE medicine SET lastAlertDate = :isoDate WHERE id = :medicineId")
     suspend fun markRefillAlerted(medicineId: Long, isoDate: String)
+
+    @Query("UPDATE medicine SET expiryDate = :isoDate WHERE id = :medicineId")
+    suspend fun setExpiryDate(medicineId: Long, isoDate: String?)
 
     @Query("UPDATE medicine SET channelVersion = channelVersion + 1, soundUri = :soundUri WHERE id = :medicineId")
     suspend fun updateSound(medicineId: Long, soundUri: String?)
