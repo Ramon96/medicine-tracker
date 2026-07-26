@@ -136,6 +136,15 @@ dependencies {
     // no CAMERA permission of its own.
     implementation(libs.play.services.code.scanner)
 
+    // Play services drags in a fragment version older than 1.3.0, which makes lint reject the
+    // ActivityResult API the notification permission already uses. Nothing here uses fragments;
+    // this only raises the floor of what gets resolved.
+    constraints {
+        implementation(libs.androidx.fragment) {
+            because("ActivityResult APIs require androidx.fragment 1.3.0 or newer")
+        }
+    }
+
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)
     // org.json ships inside android.jar, where every method throws under unit tests. The real
