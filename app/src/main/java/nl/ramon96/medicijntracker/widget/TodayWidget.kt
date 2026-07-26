@@ -36,6 +36,8 @@ import kotlinx.coroutines.flow.first
 import nl.ramon96.medicijntracker.MainActivity
 import nl.ramon96.medicijntracker.MedicijnApp
 import nl.ramon96.medicijntracker.R
+import nl.ramon96.medicijntracker.ui.common.doseLabel
+import nl.ramon96.medicijntracker.ui.today.formatAmount
 import nl.ramon96.medicijntracker.data.prefs.ThemeMode
 import nl.ramon96.medicijntracker.domain.stock.StockForecaster
 import nl.ramon96.medicijntracker.ui.theme.Palettes
@@ -74,7 +76,9 @@ object TodayWidget : GlanceAppWidget() {
                     intakeId = it.intake.id,
                     time = it.intake.scheduledAt.format(timeFormat),
                     name = it.medicine.name,
-                    dosage = it.medicine.dosage,
+                    // Same wording as the notification: the strength alone is not the dose.
+                    dosage = doseLabel(it.intake.amount, it.medicine.dosage)
+                        ?: context.getString(R.string.dose_amount, formatAmount(it.intake.amount)),
                 )
             }
 

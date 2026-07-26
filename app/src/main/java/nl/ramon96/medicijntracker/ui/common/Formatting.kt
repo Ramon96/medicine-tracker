@@ -47,6 +47,20 @@ fun scheduleSummary(medicine: Medicine): String {
 }
 
 /**
+ * One dose as "2 × 20 mg", or just the strength when a single unit is taken.
+ *
+ * Null when there is nothing to say - no strength recorded and a single unit - so callers can
+ * decide whether to fall back to a bare count. Plain Kotlin rather than a composable, because the
+ * notification and the widget need the same wording as the screens: a reminder that says "20 mg"
+ * when two tablets are due is the version of this that could actually hurt someone.
+ */
+fun doseLabel(amount: Double, dosage: String): String? {
+    val strength = dosage.takeIf { it.isNotBlank() }
+    if (amount == 1.0) return strength
+    return strength?.let { "${formatAmount(amount)} × $it" }
+}
+
+/**
  * What one dose actually is: "2 × 20 mg".
  *
  * Strength and count live in separate fields - the strength is per tablet, the count is how many
@@ -63,9 +77,8 @@ fun doseSummary(medicine: Medicine): String? {
     val amounts = medicine.doseTimes.map { it.amount }.distinct()
     val amount = amounts.singleOrNull() ?: return strength
 
-    if (amount == 1.0) return strength
-    val count = stringResource(R.string.dose_amount, formatAmount(amount))
-    return if (strength == null) count else "${formatAmount(amount)} × $strength"
+    return doseLabel(amount, medicine.dosage)
+        ?: stringResource(R.string.dose_amount, formatAmount(amount))
 }
 
 /** "Dag 14 van 28 · nog 7 dagen slikken", shown for cycle medicines. */

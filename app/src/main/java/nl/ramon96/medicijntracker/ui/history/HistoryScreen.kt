@@ -29,10 +29,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.ramon96.medicijntracker.R
+import nl.ramon96.medicijntracker.ui.common.doseSummary
 import java.time.DayOfWeek
 import java.time.format.TextStyle
 import java.util.Locale
@@ -158,8 +160,21 @@ private fun AdherenceRow(row: MedicineAdherence) {
             modifier = Modifier.fillMaxWidth(),
         )
         Text(
-            text = stringResource(R.string.history_taken_of, row.taken, row.settled),
+            // Plural on the total, so a single dose does not read as "1 van 1 innames".
+            text = pluralStringResource(
+                R.plurals.history_taken_of,
+                row.settled,
+                row.taken,
+                row.settled,
+            ),
             style = MaterialTheme.typography.bodySmall,
         )
+        // Spells out what one inname is, so the counts above can never be mistaken for tablets.
+        doseSummary(row.medicine)?.let {
+            Text(
+                text = stringResource(R.string.history_dose_is, it),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
     }
 }

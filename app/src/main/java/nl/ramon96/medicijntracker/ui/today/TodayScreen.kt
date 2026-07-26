@@ -45,6 +45,7 @@ import nl.ramon96.medicijntracker.domain.model.IntakeWithMedicine
 import nl.ramon96.medicijntracker.ui.common.PermissionCard
 import nl.ramon96.medicijntracker.ui.common.cycleSummary
 import nl.ramon96.medicijntracker.ui.common.dateFormatter
+import nl.ramon96.medicijntracker.ui.common.doseLabel
 import nl.ramon96.medicijntracker.ui.common.rememberPermissionStatus
 import nl.ramon96.medicijntracker.ui.common.timeFormatter
 
@@ -148,10 +149,10 @@ private fun DoseRow(
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(item.medicine.name, style = MaterialTheme.typography.titleMedium)
-                    val subtitle = listOfNotNull(
-                        item.medicine.dosage.takeIf { it.isNotBlank() },
-                        stringResource(R.string.dose_amount, formatAmount(item.intake.amount)),
-                    ).joinToString(" · ")
+                    // One phrase - "2 × 20 mg" - rather than a strength and a count side by
+                    // side, which invites reading them as separate instructions.
+                    val subtitle = doseLabel(item.intake.amount, item.medicine.dosage)
+                        ?: stringResource(R.string.dose_amount, formatAmount(item.intake.amount))
                     Text(subtitle, style = MaterialTheme.typography.bodySmall)
                 }
             }

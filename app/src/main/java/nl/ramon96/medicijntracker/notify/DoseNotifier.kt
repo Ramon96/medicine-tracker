@@ -8,6 +8,8 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import nl.ramon96.medicijntracker.MainActivity
 import nl.ramon96.medicijntracker.R
+import nl.ramon96.medicijntracker.ui.common.doseLabel
+import nl.ramon96.medicijntracker.ui.today.formatAmount
 import nl.ramon96.medicijntracker.domain.model.Intake
 import nl.ramon96.medicijntracker.domain.model.Medicine
 import nl.ramon96.medicijntracker.domain.stock.RefillForecast
@@ -24,8 +26,11 @@ object DoseNotifier {
     fun showDose(context: Context, intake: Intake, medicine: Medicine) {
         val channelId = NotificationChannels.ensureMedicineChannel(context, medicine)
 
+        // "2 × 20 mg", not "20 mg": this is the line someone reads while holding the box.
+        val dose = doseLabel(intake.amount, medicine.dosage)
+            ?: context.getString(R.string.dose_amount, formatAmount(intake.amount))
         val subtitle = listOfNotNull(
-            medicine.dosage.takeIf { it.isNotBlank() },
+            dose,
             context.getString(R.string.notif_dose_planned_at, intake.scheduledAt.format(timeFormat)),
         ).joinToString(" · ")
 
