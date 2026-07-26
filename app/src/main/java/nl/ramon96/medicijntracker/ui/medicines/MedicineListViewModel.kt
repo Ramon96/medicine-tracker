@@ -35,6 +35,7 @@ class MedicineListViewModel(private val container: AppContainer) : ViewModel() {
     fun addPackage(medicine: Medicine) = viewModelScope.launch {
         val units = medicine.stock.unitsPerPackage.takeIf { it > 0 } ?: return@launch
         container.medicineRepository.adjustStock(medicine.id, units)
+        container.reminderCoordinator.onStockChanged()
     }
 
     companion object {

@@ -54,6 +54,7 @@ fun MedicineWithDoseTimes.toDomain(): Medicine = Medicine(
         bufferDays = medicine.bufferDays,
         trackingEnabled = medicine.stockTrackingEnabled,
         lastAlertDate = medicine.lastAlertDate?.toLocalDate(),
+        expiryDate = medicine.expiryDate?.toLocalDate(),
     ),
     reminders = ReminderSettings(
         enabled = medicine.remindersEnabled,
@@ -66,6 +67,7 @@ fun MedicineWithDoseTimes.toDomain(): Medicine = Medicine(
     doseTimes = doseTimes
         .sortedBy { it.minuteOfDay }
         .map { DoseTime(id = it.id, time = LocalTime.ofSecondOfDay(it.minuteOfDay * 60L), amount = it.amount) },
+    barcodes = barcodes.map { it.code },
 )
 
 fun Medicine.toEntity(): MedicineEntity = MedicineEntity(
@@ -91,6 +93,7 @@ fun Medicine.toEntity(): MedicineEntity = MedicineEntity(
     bufferDays = stock.bufferDays,
     stockTrackingEnabled = stock.trackingEnabled,
     lastAlertDate = stock.lastAlertDate?.toDb(),
+    expiryDate = stock.expiryDate?.toDb(),
     remindersEnabled = reminders.enabled,
     snoozeMinutes = reminders.snoozeMinutes,
     repeatIfIgnored = reminders.repeatIfIgnored,
@@ -107,6 +110,9 @@ fun Medicine.toDoseTimeEntities(): List<DoseTimeEntity> = doseTimes.map {
         amount = it.amount,
     )
 }
+
+fun Medicine.toBarcodeEntities(): List<MedicineBarcodeEntity> =
+    barcodes.distinct().map { MedicineBarcodeEntity(medicineId = id, code = it) }
 
 fun IntakeEntity.toDomain(): Intake = Intake(
     id = id,

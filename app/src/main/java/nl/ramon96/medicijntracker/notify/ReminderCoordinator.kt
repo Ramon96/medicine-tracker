@@ -89,6 +89,17 @@ class ReminderCoordinator(
     }
 
     /**
+     * Stock went up outside the dose flow - a package was received or scanned in.
+     *
+     * The widget shows a "bestellen" line driven by the refill forecast, so without this it keeps
+     * telling the user to order a medicine they have just restocked.
+     */
+    suspend fun onStockChanged() {
+        checkRefills(LocalDate.now())
+        TodayWidget.refresh(context)
+    }
+
+    /**
      * Warns about medicines that have to be ordered now, taking the pharmacy lead time into
      * account. Throttled per medicine so it does not repeat every day.
      */

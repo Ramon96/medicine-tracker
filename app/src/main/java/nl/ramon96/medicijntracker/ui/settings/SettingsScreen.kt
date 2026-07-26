@@ -66,6 +66,8 @@ fun SettingsScreen(viewModel: SettingsViewModel, modifier: Modifier = Modifier) 
         HorizontalDivider()
         ReminderSection(viewModel)
         HorizontalDivider()
+        ScanningSection(viewModel)
+        HorizontalDivider()
         UpdateSection(viewModel)
         HorizontalDivider()
         DeliverySection()
@@ -179,6 +181,24 @@ private fun PaletteSwatch(
         }
         Text(label, style = MaterialTheme.typography.labelSmall)
     }
+}
+
+// --- Herinneringen ----------------------------------------------------------
+
+// --- Scannen ----------------------------------------------------------------
+
+@Composable
+private fun ScanningSection(viewModel: SettingsViewModel) {
+    val lookupEnabled by viewModel.barcodeLookup.collectAsStateWithLifecycle()
+
+    SectionTitle(stringResource(R.string.settings_scanning))
+
+    SwitchRow(
+        label = stringResource(R.string.settings_barcode_lookup),
+        description = stringResource(R.string.settings_barcode_lookup_hint),
+        checked = lookupEnabled,
+        onCheckedChange = viewModel::setBarcodeLookup,
+    )
 }
 
 // --- Herinneringen ----------------------------------------------------------
