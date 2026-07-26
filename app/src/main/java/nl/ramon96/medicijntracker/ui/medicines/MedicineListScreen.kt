@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import nl.ramon96.medicijntracker.R
 import nl.ramon96.medicijntracker.domain.model.Medicine
+import nl.ramon96.medicijntracker.ui.common.doseSummary
 import nl.ramon96.medicijntracker.ui.common.scheduleSummary
 import nl.ramon96.medicijntracker.ui.common.shortDateFormatter
 import nl.ramon96.medicijntracker.ui.today.formatAmount
@@ -111,8 +112,8 @@ private fun MedicineCard(row: MedicineRow, onClick: () -> Unit, onDelete: () -> 
         Row(Modifier.padding(16.dp), verticalAlignment = Alignment.Top) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(row.medicine.name, style = MaterialTheme.typography.titleMedium)
-                if (row.medicine.dosage.isNotBlank()) {
-                    Text(row.medicine.dosage, style = MaterialTheme.typography.bodySmall)
+                doseSummary(row.medicine)?.let {
+                    Text(it, style = MaterialTheme.typography.bodySmall)
                 }
                 Text(scheduleSummary(row.medicine), style = MaterialTheme.typography.bodySmall)
 

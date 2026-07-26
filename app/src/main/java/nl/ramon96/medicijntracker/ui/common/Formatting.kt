@@ -8,6 +8,7 @@ import nl.ramon96.medicijntracker.domain.model.Medicine
 import nl.ramon96.medicijntracker.domain.model.Schedule
 import nl.ramon96.medicijntracker.domain.model.ScheduleType
 import nl.ramon96.medicijntracker.domain.schedule.ScheduleCalculator
+import nl.ramon96.medicijntracker.ui.today.formatAmount
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -43,6 +44,41 @@ fun scheduleSummary(medicine: Medicine): String {
         )
     }
     return if (times.isBlank()) pattern else "$pattern · $times"
+}
+
+/**
+ * One dose as "2 × 20 mg", or just the strength when a single unit is taken.
+ *
+ * Null when there is nothing to say - no strength recorded and a single unit - so callers can
+ * decide whether to fall back to a bare count. Plain Kotlin rather than a composable, because the
+ * notification and the widget need the same wording as the screens: a reminder that says "20 mg"
+ * when two tablets are due is the version of this that could actually hurt someone.
+ */
+fun doseLabel(amount: Double, dosage: String): String? {
+    val strength = dosage.takeIf { it.isNotBlank() }
+    if (amount == 1.0) return strength
+    return strength?.let { "${formatAmount(amount)} × $it" }
+}
+
+/**
+ * What one dose actually is: "2 × 20 mg".
+ *
+ * Strength and count live in separate fields - the strength is per tablet, the count is how many
+ * are taken at once - so showing the strength on its own reads as the whole dose and hides the
+ * fact that a count was ever entered.
+ *
+ * Returns just the strength when one tablet is taken, and falls back to a bare count when no
+ * strength was filled in. Amounts that differ per time of day cannot be summed into one line, so
+ * those show the strength and leave the per-time counts to the rows that list them.
+ */
+@Composable
+fun doseSummary(medicine: Medicine): String? {
+    val strength = medicine.dosage.takeIf { it.isNotBlank() }
+    val amounts = medicine.doseTimes.map { it.amount }.distinct()
+    val amount = amounts.singleOrNull() ?: return strength
+
+    return doseLabel(amount, medicine.dosage)
+        ?: stringResource(R.string.dose_amount, formatAmount(amount))
 }
 
 /** "Dag 14 van 28 · nog 7 dagen slikken", shown for cycle medicines. */

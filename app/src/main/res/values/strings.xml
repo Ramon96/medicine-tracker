@@ -52,8 +52,9 @@
     <!-- Formulier -->
     <string name="field_name">Naam</string>
     <string name="field_dosage">Sterkte</string>
-    <string name="field_dosage_hint">bijv. 50 mg</string>
-    <string name="field_amount">Aantal</string>
+    <string name="field_dosage_hint">bijv. 20 mg</string>
+    <string name="field_dosage_support">De sterkte van één tablet. Hoeveel je er per keer neemt vul je bij Tijdstippen in.</string>
+    <string name="field_amount">Aantal per keer</string>
     <string name="field_notes">Notities</string>
     <string name="field_active">Actief</string>
     <string name="field_start_date">Startdatum: %1$s</string>
@@ -61,6 +62,7 @@
     <string name="field_end_date_none">Geen einddatum</string>
     <string name="section_schedule">Schema</string>
     <string name="section_times">Tijdstippen</string>
+    <string name="section_times_hint">Per tijdstip: hoe laat, en hoeveel stuks je dan neemt. Neem je twee tabletten van 20 mg, vul dan 20 mg in bij Sterkte en 2 hier.</string>
     <string name="section_stock">Voorraad en bestellen</string>
     <string name="section_reminders">Herinneringen</string>
     <string name="error_no_times">Voeg minstens één tijdstip toe.</string>
@@ -106,7 +108,7 @@
     <string name="history_adherence_title">Therapietrouw deze maand</string>
     <string name="history_empty">Nog geen gegevens voor deze maand.</string>
     <string name="history_no_data">Geen gegevens</string>
-    <string name="history_taken_of">%1$d van %2$d ingenomen</string>
+    <string name="history_dose_is">Eén inname is %1$s</string>
 
     <!-- Instellingen -->
     <string name="settings_delivery_title">Komen de herinneringen aan?</string>
@@ -259,6 +261,10 @@
     <plurals name="medicine_order_by">
         <item quantity="one">Bestellen vóór %1$s · nog 1 dag voorraad</item>
         <item quantity="other">Bestellen vóór %1$s · nog %2$d dagen voorraad</item>
+    </plurals>
+    <plurals name="history_taken_of">
+        <item quantity="one">%1$d van %2$d inname gedaan</item>
+        <item quantity="other">%1$d van %2$d innames gedaan</item>
     </plurals>
     <plurals name="settings_snooze">
         <item quantity="one">Snooze: 1 minuut</item>

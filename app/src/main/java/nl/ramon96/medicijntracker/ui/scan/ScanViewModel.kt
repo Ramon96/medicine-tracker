@@ -55,7 +55,7 @@ sealed interface ScanUiState {
         val lookupError: LookupError? = null,
     ) : ScanUiState
 
-    data class Failed(val error: ScanError) : ScanUiState
+    data class Failed(val error: ScanError, val detail: String? = null) : ScanUiState
 }
 
 class ScanViewModel(private val container: AppContainer) : ViewModel() {
@@ -74,7 +74,7 @@ class ScanViewModel(private val container: AppContainer) : ViewModel() {
         when (outcome) {
             // Backing out of the scanner should leave no trace.
             is ScanOutcome.Cancelled -> _state.value = ScanUiState.Idle
-            is ScanOutcome.Failed -> _state.value = ScanUiState.Failed(outcome.error)
+            is ScanOutcome.Failed -> _state.value = ScanUiState.Failed(outcome.error, outcome.detail)
             is ScanOutcome.Scanned -> resolve(outcome.code)
         }
     }

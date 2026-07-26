@@ -99,6 +99,9 @@ fun ScanSheet(
                         text = stringResource(scanErrorMessage(state.error)),
                         style = MaterialTheme.typography.bodyMedium,
                     )
+                    state.detail?.let { detail ->
+                        Text(text = detail, style = MaterialTheme.typography.bodySmall)
+                    }
                     Button(onClick = onDismiss, modifier = Modifier.align(Alignment.End)) {
                         Text(stringResource(R.string.action_cancel))
                     }
