@@ -52,8 +52,9 @@
     <!-- Formulier -->
     <string name="field_name">Naam</string>
     <string name="field_dosage">Sterkte</string>
-    <string name="field_dosage_hint">bijv. 50 mg</string>
-    <string name="field_amount">Aantal</string>
+    <string name="field_dosage_hint">bijv. 20 mg</string>
+    <string name="field_dosage_support">De sterkte van één tablet. Hoeveel je er per keer neemt vul je bij Tijdstippen in.</string>
+    <string name="field_amount">Aantal per keer</string>
     <string name="field_notes">Notities</string>
     <string name="field_active">Actief</string>
     <string name="field_start_date">Startdatum: %1$s</string>
@@ -61,6 +62,7 @@
     <string name="field_end_date_none">Geen einddatum</string>
     <string name="section_schedule">Schema</string>
     <string name="section_times">Tijdstippen</string>
+    <string name="section_times_hint">Per tijdstip: hoe laat, en hoeveel stuks je dan neemt. Neem je twee tabletten van 20 mg, vul dan 20 mg in bij Sterkte en 2 hier.</string>
     <string name="section_stock">Voorraad en bestellen</string>
     <string name="section_reminders">Herinneringen</string>
     <string name="error_no_times">Voeg minstens één tijdstip toe.</string>

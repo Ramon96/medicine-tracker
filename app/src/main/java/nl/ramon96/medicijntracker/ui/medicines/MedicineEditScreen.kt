@@ -91,6 +91,7 @@ fun MedicineEditScreen(
                 onValueChange = viewModel::setDosage,
                 label = { Text(stringResource(R.string.field_dosage)) },
                 placeholder = { Text(stringResource(R.string.field_dosage_hint)) },
+                supportingText = { Text(stringResource(R.string.field_dosage_support)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -149,6 +150,12 @@ fun MedicineEditScreen(
         }
 
         item { SectionTitle(stringResource(R.string.section_times)) }
+        item {
+            Text(
+                text = stringResource(R.string.section_times_hint),
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
 
         itemsIndexed(draft.doseTimes, key = { index, _ -> index }) { index, doseTime ->
             DoseTimeRow(

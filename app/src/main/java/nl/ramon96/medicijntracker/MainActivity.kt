@@ -8,6 +8,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -229,6 +231,12 @@ private fun NavGraph(
         navController = navController,
         startDestination = TopLevel.TODAY.route,
         modifier = modifier,
+        // Navigation-Compose cross-fades between destinations by default. Switching tabs is not
+        // a journey anywhere, and the fade just delays reading the screen.
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None },
+        popEnterTransition = { EnterTransition.None },
+        popExitTransition = { ExitTransition.None },
     ) {
         composable(TopLevel.TODAY.route) {
             val viewModel: TodayViewModel = viewModel(factory = TodayViewModel.factory(container))
