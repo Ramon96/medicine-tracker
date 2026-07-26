@@ -1,6 +1,8 @@
 package nl.ramon96.medicijntracker.scan
 
+import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -62,6 +64,20 @@ private val FATAL_AVAILABILITY = setOf(
     ConnectionResult.SERVICE_DISABLED,
 )
 
+/**
+ * The scanner opens its own activity, so it needs an activity to start from. Compose only
+ * promises a Context, and on some setups that is a wrapper rather than the activity itself -
+ * which the library resolves to null and then dereferences.
+ */
+private fun Context.findActivity(): Activity? {
+    var current: Context = this
+    while (current is ContextWrapper) {
+        if (current is Activity) return current
+        current = current.baseContext
+    }
+    return null
+}
+
 private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
     val availability = runCatching {
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
@@ -90,8 +106,10 @@ private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
 
     // On a phone without Play services the scanner classes can fail to link at all, which has to
     // surface as a message rather than as a crash.
+    val host = context.findActivity() ?: context
+
     runCatching {
-        GmsBarcodeScanning.getClient(context, options)
+        GmsBarcodeScanning.getClient(host, options)
             .startScan()
             .addOnSuccessListener { barcode ->
                 onResult(ScanOutcome.Scanned(Gs1Parser.parse(barcode.rawValue)))
@@ -111,8 +129,8 @@ private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
 
 /** Short, human-readable reason, shown under the error so a failure can be reported back. */
 private fun Throwable.describe(): String {
-    val code = (this as? MlKitException)?.errorCode?.let { "code $it: " }.orEmpty()
-    return code + (message ?: this::class.java.simpleName)
+    val code = (this as? MlKitException)?.errorCode?.let { "code $it " }.orEmpty()
+    return "$code${this::class.java.simpleName}: ${message ?: "-"}"
 }
 
 /**
