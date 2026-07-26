@@ -21,7 +21,7 @@ enum class ScanError { PLAY_SERVICES_MISSING, MODULE_UNAVAILABLE, CAMERA_UNAVAIL
 sealed interface ScanOutcome {
     data class Scanned(val code: ScannedCode) : ScanOutcome
     data object Cancelled : ScanOutcome
-    data class Failed(val error: ScanError) : ScanOutcome
+    data class Failed(val error: ScanError, val detail: String? = null) : ScanOutcome
 }
 
 /**
@@ -47,8 +47,27 @@ fun rememberCodeScanner(onResult: (ScanOutcome) -> Unit): () -> Unit {
     }
 }
 
+/**
+ * Play services states that scanning genuinely cannot recover from.
+ *
+ * Deliberately not "anything that is not SUCCESS": that check compares the installed Play
+ * services against the version this client was built against, so a working phone reports
+ * SERVICE_VERSION_UPDATE_REQUIRED or SERVICE_UPDATING and would be told it has no Play services
+ * at all. Those cases are left to the scanner itself, which either prompts or fails with a
+ * specific reason.
+ */
+private val FATAL_AVAILABILITY = setOf(
+    ConnectionResult.SERVICE_MISSING,
+    ConnectionResult.SERVICE_INVALID,
+    ConnectionResult.SERVICE_DISABLED,
+)
+
 private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
-    if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context) != ConnectionResult.SUCCESS) {
+    val availability = runCatching {
+        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
+    }.getOrDefault(ConnectionResult.SUCCESS)
+
+    if (availability in FATAL_AVAILABILITY) {
         onResult(ScanOutcome.Failed(ScanError.PLAY_SERVICES_MISSING))
         return
     }
@@ -79,9 +98,21 @@ private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
             }
             .addOnCanceledListener { onResult(ScanOutcome.Cancelled) }
             .addOnFailureListener { onResult(it.toOutcome()) }
-    }.onFailure {
-        onResult(ScanOutcome.Failed(ScanError.PLAY_SERVICES_MISSING))
+    }.onFailure { thrown ->
+        // Only a missing class really means "no Play services here". Anything else is reported
+        // as itself, with the reason attached - this app has no logcat to fall back on.
+        val missing = thrown is NoClassDefFoundError || thrown is ClassNotFoundException
+        onResult(
+            if (missing) ScanOutcome.Failed(ScanError.PLAY_SERVICES_MISSING)
+            else ScanOutcome.Failed(ScanError.UNKNOWN, thrown.describe()),
+        )
     }
+}
+
+/** Short, human-readable reason, shown under the error so a failure can be reported back. */
+private fun Throwable.describe(): String {
+    val code = (this as? MlKitException)?.errorCode?.let { "code $it: " }.orEmpty()
+    return code + (message ?: this::class.java.simpleName)
 }
 
 /**
@@ -90,13 +121,13 @@ private fun startScan(context: Context, onResult: (ScanOutcome) -> Unit) {
  * error message on screen.
  */
 private fun Throwable.toOutcome(): ScanOutcome {
-    if (this !is MlKitException) return ScanOutcome.Failed(ScanError.UNKNOWN)
+    if (this !is MlKitException) return ScanOutcome.Failed(ScanError.UNKNOWN, describe())
     return when (errorCode) {
         MlKitException.CODE_SCANNER_CANCELLED -> ScanOutcome.Cancelled
         MlKitException.CODE_SCANNER_UNAVAILABLE,
         MlKitException.UNAVAILABLE,
-        -> ScanOutcome.Failed(ScanError.MODULE_UNAVAILABLE)
-        MlKitException.PERMISSION_DENIED -> ScanOutcome.Failed(ScanError.CAMERA_UNAVAILABLE)
-        else -> ScanOutcome.Failed(ScanError.UNKNOWN)
+        -> ScanOutcome.Failed(ScanError.MODULE_UNAVAILABLE, describe())
+        MlKitException.PERMISSION_DENIED -> ScanOutcome.Failed(ScanError.CAMERA_UNAVAILABLE, describe())
+        else -> ScanOutcome.Failed(ScanError.UNKNOWN, describe())
     }
 }
